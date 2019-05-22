@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>post</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <style type="text/css">
+        body {
+            background-color: #666666;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <button onclick="onClick('up')">up</button>
+        <input type="number" name="number" value="123">
+        <button onclick="onClick('set')">set</button>
+        <button onclick="onClick('down')">down</button>
+    </div>
+    <div id="log"></div>
+
+    <script type="text/javascript">
+        function onClick(value) {
+            var command = value;
+            var data = {
+                command: command
+            };
+            if (value == 'set') {
+                data['count'] = parseInt($('input[name]').val());
+            }
+            $.ajax({
+                url: 'api',
+                type: 'post',
+                dataType: 'json',
+                data: data,
+                timeout: 3000,
+            }).done(function (data) {
+                console.dir(data);
+                $('input[name]').val(data.count);
+            }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log("error");
+            });
+
+        }
+    </script>
+</body>
+
+</html>

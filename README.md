@@ -9,3 +9,5 @@ v12.0.0
 
 開始
 > npm start
+
+> npm install socket.io

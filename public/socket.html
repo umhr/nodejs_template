@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>socket.io</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="libs/socket.io/2.2.0/socket.io.js"></script>
+    <style type="text/css">
+        body {
+            background-color: #666666;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="id"></div>
+    <div>
+        <button onclick="onClick('up')">up</button>
+        <input type="number" name="number">
+        <button onclick="onClick('set')">set</button>
+        <button onclick="onClick('down')">down</button>
+    </div>
+    <div id="log"></div>
+
+    <script type="text/javascript">
+        var id = Math.floor(Math.random() * 1000);
+        $('#id').text(id);
+
+        this.socket = io.connect('http://127.0.0.1:3000/api');
+        // emit は送る
+        this.socket.emit('login', {
+            id: id
+        });
+
+        // on 受け取る
+        this.socket.on('setup', (data) => {
+            $('input[name]').val(data.count);
+        });
+
+        this.socket.on('receive', (data) => {
+            console.log('receive がありました。', data);
+            $('#log').text(JSON.stringify(data));
+            $('input[name]').val(data.count);
+        });
+
+        function onClick(value) {
+            if (value == 'up') {
+                this.socket.emit('up');
+            } else if (value == 'down') {
+                this.socket.emit('down');
+            } else if (value == 'set') {
+                var num = parseInt($('input[name]').val());
+                this.socket.emit('set', {
+                    count: num
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

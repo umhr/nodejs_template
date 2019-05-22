@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>index</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <style type="text/css">
+        body {
+            background-color: #666666;
+        }
+    </style>
+</head>
+
+<body>
+    <ul>
+        <li><a href="socket.html" target="_blank">socket で送信します。</a></li>
+        <li><a href="post.html" target="_blank">post で送信します。</a></li>
+        <li><a href="get.html" target="_blank">get で送信します。</a>
+            <ul>
+                <li><a href="api?command=up" target="_blank">api?command=up で +1 します。</a></li>
+                <li><a href="api?command=down" target="_blank">api?command=down で -1 します。</a></li>
+                <li><a href="api?command=set&count=456" target="_blank">api?command=set&count=456 で456にセットします。</a></li>
+                <li><a href="api/params/up" target="_blank">api/up で +1 します。</a></li>
+                <li><a href="api/params/down" target="_blank">api/down で -1 します。</a></li>
+                <li><a href="api/params/set/456" target="_blank">api/set/456 で456にセットします。</a></li>
+            </ul>
+        </li>
+    </ul>
+</body>
+
+</html>
