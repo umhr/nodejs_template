@@ -1,5 +1,39 @@
 extends layout
 
+style.
+
 block content
   h1= title
   p Welcome to #{title}
+
+  h2 API
+  ul
+  li
+   a(href="api/socket.html", target="_blank") socket で送信します。
+  li
+   a(href="api/post.html", target="_blank") post で送信します。
+  li
+   a(href="api/get.html", target="_blank") get で送信します。
+   
+  ul
+    li
+      a(href="api?command=up", target="_blank") api?command=up で +1 します。
+    li
+      a(href="api?command=down", target="_blank") api?command=down で -1 します。
+    li
+      a(href="api?command=set&count=456", target="_blank") api?command=set&amp;count=456 で456にセットします。
+    li
+      a(href="api/params/up", target="_blank") api/up で +1 します。
+    li
+      a(href="api/params/down", target="_blank") api/down で -1 します。
+    li
+      a(href="api/params/set/456", target="_blank") api/set/456 で456にセットします。
+
+  h2 upload
+  ul
+  li
+   a(href="upload/drop.html", target="_blank") エリアにドロップ 複数対応で画面遷移なしでファイル送信します。
+  li
+   a(href="upload/formdata.html", target="_blank") ファイル選択 複数対応で画面遷移なしでファイル送信します。
+  li
+   a(href="upload/upload.html", target="_blank") ファイル選択 複数対応で画面遷移ありでファイル送信します。

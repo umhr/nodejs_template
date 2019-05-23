@@ -1,0 +1,50 @@
+﻿<html>
+
+<head>
+    <title>formData</title>
+</head>
+
+<body>
+    <div><input type="text" id="txt" value="あいうえおかきくけこ"></div>
+    <div><input type="file" name="up"></div>
+    <div><input type="file" name="up"></div>
+    <div><input type="file" name="up"></div>
+
+    <button onclick="onClick()">onClick</button>
+    <div id="response"></div>
+
+    <script type="text/javascript">
+        function onClick() {
+            console.log("onClick");
+            var formData = new FormData();
+            var elementList = document.getElementsByName("up");
+            var n = elementList.length;
+            for (var i = 0; i < n; i++) {
+                var element = elementList[i];
+                if (element.files.length > 0) {
+                    var m = element.files.length;
+                    for (var j = 0; j < m; j++) {
+                        var file = element.files[j];
+                        if (file.type == "image/jpeg" || file.type == "image/png" || file.type == "video/mp4") {
+                            formData.append("upfile", file);
+                        } else {
+                            console.log(file.type, "指定typeのみ送信できます。");
+                        }
+                        console.dir(file);
+                    }
+                }
+            }
+            formData.append("text", document.getElementById("txt").value);
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "../upload?fit=contain&width=300&height=300");
+            xhr.send(formData);
+            xhr.addEventListener("load", function () {
+                console.log(this.response);
+                document.getElementById('response').innerText = this.response;
+            }, false);
+        }
+    </script>
+
+</body>
+
+</html>

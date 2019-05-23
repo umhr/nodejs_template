@@ -11,6 +11,13 @@ var DBManager = function () {
 
 DBManager.prototype._constructor = function () {
     console.log('DBManager._constructor');
+    try {
+        var json = require('./savedata.json');
+        this._count = json.count || 0;
+    } catch (e) {
+
+    }
+    console.log(json, this._count);
 };
 
 DBManager.prototype.getCount = function () {
@@ -43,7 +50,7 @@ DBManager.prototype.exit = function () {
     data['count'] = this._count;
     var fs = require("fs");
     var json = JSON.stringify(data, null, "    ");
-    fs.writeFileSync("savedata.json", json);
+    fs.writeFileSync("routes/api/savedata.json", json);
     console.log("Saved!");
 };
 

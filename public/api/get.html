@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>post</title>
+    <title>get</title>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <style type="text/css">
         body {
@@ -31,8 +31,8 @@
                 data['count'] = parseInt($('input[name]').val());
             }
             $.ajax({
-                url: 'api',
-                type: 'post',
+                url: '../api',
+                type: 'get',
                 dataType: 'json',
                 data: data,
                 timeout: 3000,
