@@ -1,0 +1,18 @@
+{
+  "title": "nodejs_template",
+  "port": 3000,
+  "pigs": {
+    "boo": {
+      "hobby": "eat",
+      "age": 6
+    },
+    "foo": {
+      "hobby": "sleep",
+      "age": 5
+    },
+    "woo": {
+      "hobby": "build a house",
+      "age": 4
+    }
+  }
+}

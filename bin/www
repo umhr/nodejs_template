@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-
+var setting = require('../Setting').getInstance();
 var app = require('../app');
 var debug = require('debug')('nodejs-template:server');
 var http = require('http');
@@ -12,7 +12,8 @@ var http = require('http');
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+//var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || setting.get('port'));
 app.set('port', port);
 
 /**

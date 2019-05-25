@@ -1,5 +1,5 @@
 exports.getInstance = function () {
-    console.log('DBManager');
+    //console.log('DBManager');
     return new DBManager();
 };
 
@@ -10,14 +10,14 @@ var DBManager = function () {
 }
 
 DBManager.prototype._constructor = function () {
-    console.log('DBManager._constructor');
+    //console.log('DBManager._constructor');
     try {
         var json = require('./savedata.json');
         this._count = json.count || 0;
     } catch (e) {
 
     }
-    console.log(json, this._count);
+    //console.log(json, this._count);
 };
 
 DBManager.prototype.getCount = function () {
@@ -49,9 +49,9 @@ DBManager.prototype.exit = function () {
     var data = {};
     data['count'] = this._count;
     var fs = require("fs");
-    var json = JSON.stringify(data, null, "    ");
+    var json = JSON.stringify(data, null, "");
     fs.writeFileSync("routes/api/savedata.json", json);
-    console.log("Saved!");
+    console.log("DBManager Saved!");
 };
 
 DBManager.prototype.addEventListener = function (type, listener) {

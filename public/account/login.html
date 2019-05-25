@@ -1,0 +1,59 @@
+﻿<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>login</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <style type="text/css">
+        body {
+            background-color: #eeeeee;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        login（既にアカウントを持っている）
+    </div>
+    <div>
+        id:<input type="text" id="id">
+    </div>
+    <div>
+        pw:<input type="password" id="pw">
+    </div>
+    <div>
+        <button onclick="onClick()">submit</button>
+    </div>
+    <div>
+        <a href='signup.html'>アカウント作成</a>
+    </div>
+    <div id="log"></div>
+
+    <script type="text/javascript">
+        function onClick() {
+            var data = {};
+            data.id = $('#id').val();
+            data.pw = $('#pw').val();
+            console.log(data);
+
+            $.ajax({
+                url: 'login',
+                type: 'post',
+                dataType: 'json',
+                data: data,
+                timeout: 3000,
+            }).done(function (data) {
+                console.dir(data);
+                if (data.status == "success") {
+                    document.location = "./";
+                }
+                $("#log").text(JSON.stringify(data));
+            }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log("error");
+            });
+        }
+    </script>
+</body>
+
+</html>

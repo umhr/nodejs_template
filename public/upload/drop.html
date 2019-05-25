@@ -28,22 +28,27 @@
                 var formData = new FormData();
                 if (files) {
                     var n = files.length;
+                    var count = 0;
                     for (var i = 0; i < n; i++) {
                         var file = files[i];
-                        if (file.type == "image/jpeg" || file.type == "image/png" || file.type == "video/mp4") {
+                        if (file.type == "image/jpeg" || file.type == "image/png" || file.type == "video/mp4" ||
+                            file.type == "audio/mp3") {
                             formData.append("upfile", file);
+                            count++;
                         } else {
                             console.log(file.type, "指定typeのみ送信できます。");
                         }
                         console.dir(file);
                     };
-                    var xhr = new XMLHttpRequest();
-                    xhr.open("POST", "../upload?fit=cover&width=200&height=200");
-                    xhr.send(formData);
-                    xhr.addEventListener("load", function () {
-                        console.log(this.response);
-                        document.getElementById('response').innerText = this.response;
-                    }, false)
+                    if (count > 0) {
+                        var xhr = new XMLHttpRequest();
+                        xhr.open("POST", "../upload?fit=cover&width=200&height=200");
+                        xhr.send(formData);
+                        xhr.addEventListener("load", function () {
+                            console.log(this.response);
+                            document.getElementById('response').innerText = this.response;
+                        }, false);
+                    }
                 }
 
                 e.preventDefault();

@@ -1,0 +1,36 @@
+﻿<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>index</title>
+    <style type="text/css">
+        body {
+            background-color: #eeeeee;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="log"></div>
+
+    <script type="text/javascript" src="login.js"></script>
+
+    <script type="text/javascript">
+        console.log("login", login);
+        var innerHTML = "";
+        if (login) {
+            innerHTML = "welcome<br><button onclick='onClick()'>logout</button>";
+        } else {
+            innerHTML = "<a href='login.html'>login してください。</a>";
+        }
+        document.getElementById("log").innerHTML = innerHTML;
+
+        function onClick() {
+            document.cookie = "account=; max-age=0; path=/";
+            document.location = "./";
+        }
+    </script>
+</body>
+
+</html>

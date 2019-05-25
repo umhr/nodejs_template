@@ -84,7 +84,7 @@ router.post('/', function (req, res, next) {
 });
 
 router.setIO = (io) => {
-  console.log('app.io');
+  //console.log('app.io');
   const app = io.of('/api');
 
   app.on('connection', (socket) => {

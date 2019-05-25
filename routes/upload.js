@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var multer = require("multer");
-const sharp = require('sharp');
+var fs = require('fs');
 var thumbManager = require('./upload/ThumbManager').getInstance();
 
 //https://github.com/expressjs/multer
@@ -9,7 +9,11 @@ var storage = multer.diskStorage({
   // ファイルの保存先を指定
   destination: function (req, file, cb) {
     console.log("destination");
-    cb(null, 'public/upload/upfile');
+    var filepath = 'public/upload/upfile';
+    if (!fs.existsSync(filepath) || !fs.statSync(filepath).isDirectory()) {
+      fs.mkdirSync(filepath);
+    }
+    cb(null, filepath);
   },
   // ファイル名を指定(オリジナルのファイル名を指定)
   filename: function (req, file, cb) {

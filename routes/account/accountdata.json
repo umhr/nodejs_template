@@ -1,0 +1,13 @@
+{
+    "list": {
+        "admin": {
+            "pw": "admin",
+            "authority": "su"
+        },
+        "user": {
+            "pw": "1234",
+            "authority": "user"
+        }
+    },
+    "maxAge": 60000
+}

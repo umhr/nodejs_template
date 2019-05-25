@@ -19,13 +19,15 @@
             var formData = new FormData();
             var elementList = document.getElementsByName("up");
             var n = elementList.length;
+
             for (var i = 0; i < n; i++) {
                 var element = elementList[i];
                 if (element.files.length > 0) {
                     var m = element.files.length;
                     for (var j = 0; j < m; j++) {
                         var file = element.files[j];
-                        if (file.type == "image/jpeg" || file.type == "image/png" || file.type == "video/mp4") {
+                        if (file.type == "image/jpeg" || file.type == "image/png" || file.type == "video/mp4" ||
+                            file.type == "audio/mp3") {
                             formData.append("upfile", file);
                         } else {
                             console.log(file.type, "指定typeのみ送信できます。");
@@ -34,6 +36,7 @@
                     }
                 }
             }
+
             formData.append("text", document.getElementById("txt").value);
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "../upload?fit=contain&width=300&height=300");
