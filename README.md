@@ -13,6 +13,10 @@ v12.0.0
 ### 画像変換モジュール
 \> npm install sharp  
 
+## 準備  
+\> npm install  
+
+
 ## 開始  
 \> npm start  
 
