@@ -27,7 +27,8 @@
         var id = Math.floor(Math.random() * 1000);
         $('#id').text(id);
 
-        this.socket = io.connect('http://127.0.0.1:3000/api');
+        var url = window.location.origin + '/api';
+        this.socket = io.connect(url);
         // emit は送る
         this.socket.emit('login', {
             id: id

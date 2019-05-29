@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>getQuery</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <style type="text/css">
+        body {
+            background-color: #CCCCCC;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="log"></div>
+
+    <script type="text/javascript">
+        document.getElementById("log").innerText = JSON.stringify(getQuery());
+
+        function getQuery() {
+            if (window.location.search === "") return;
+            const variables = window.location.search.split("?")[1].split("&");
+            const obj = {};
+            variables.forEach(function (v, i) {
+                const variable = v.split("=");
+                if (isNaN(Number(variable[1]))) {
+                    obj[variable[0]] = variable[1];
+                } else {
+                    obj[variable[0]] = Number(variable[1]);
+                }
+            });
+            return obj;
+        }
+    </script>
+</body>
+
+</html>
