@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-var setting = require('../Setting').getInstance();
+var setting = require('../system/Setting').getInstance();
 var app = require('../app');
 var debug = require('debug')('nodejs-template:server');
 var http = require('http');

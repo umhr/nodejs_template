@@ -3,14 +3,17 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-//var auth = require('./auth');
-var setting = require('./Setting').getInstance();
+//var fs = require('fs');
+//var auth = require('./system/auth');
+var setting = require('./system/Setting').getInstance();
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var apiRouter = require('./routes/api');
 var upload = require('./routes/upload');
 var account = require('./routes/account');
+//var alive = require('./routes/alive');
+var log = require('./routes/log/log');
 
 var app = express();
 
@@ -20,6 +23,8 @@ app.set('view engine', 'jade');
 
 //app.use(auth);
 app.use(logger('dev'));
+
+
 app.use(express.json());
 app.use(express.urlencoded({
   extended: false
@@ -32,6 +37,8 @@ app.use('/users', usersRouter);
 app.use('/api', apiRouter);
 app.use('/upload', upload);
 app.use('/account', account);
+//app.use('/alive', alive);
+app.use('/log', log);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

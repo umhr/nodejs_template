@@ -35,6 +35,7 @@ block content
     li
       a(href="api/params/set/456", target="_blank") api/set/456 で456にセットします。
 
+
   h2 upload
   ul
   li
@@ -53,3 +54,20 @@ block content
    a(href="account/login.html", target="_blank") ログイン（既にアカウントを持っている人向け）
   li
    a(href="account/signup.html", target="_blank") アカウント作成（ミスしてgithubで共有しないようにsave機能は一時的に停止）
+
+
+  h2 log
+  ul
+  li
+   a(href="log/set?name=home&language=ja", target="_blank") home に日本語でアクセスしたことを記録
+  li
+   a(href="log/set?name=page1&language=cn", target="_blank") page1 に中国語でアクセスしたことを記録
+  li
+   a(href="log/get?startDate=2015-4-02&endDate=2030-6-5&format=json", target="_blank") 指定の期間内の記録を nameとlanguageでカウントして jsonで返す。
+  li
+   a(href="log/get?startDate=2018-4-02&endDate=2030-6-5&format=csv", target="_blank") 指定の期間内の記録を nameとlanguageでカウントして csv（shift-jis）でダウンロード。
+  li
+   a(href="log/get", target="_blank") 無指定の場合は、30日以内の記録をnameとlanguageでカウントして jsonで返す。
+  li
+   a(href="log/get?startDate=2018-4-02&endDate=2030-6-5&format=raw", target="_blank") 指定の期間内の全記録を csv（shift-jis） でダウンロード。
+
