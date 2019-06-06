@@ -1,30 +1,30 @@
 exports.getInstance = function () {
     //console.log('DBManager');
-    return new LogManager();
+    return new AccessManager();
 };
 
-var LogManager = function () {
+var AccessManager = function () {
     this._list = [];
     this._sqLiteManager;
     this._constructor();
 }
 
-LogManager.prototype._constructor = function () {
-    //console.log('LogManager.prototype._constructor');
+AccessManager.prototype._constructor = function () {
+    //console.log('AccessManager.prototype._constructor');
     this._sqLiteManager = new SQLiteManager();
 };
 
-LogManager.prototype.set = function (query, ipAddress) {
+AccessManager.prototype.set = function (query, ipAddress) {
     var data = {};
-    data.name = query.name == undefined ? 'a' : query.name;
-    data.language = query.language == undefined ? 'ja' : query.language;
+    data.name = query.name == undefined ? '' : query.name;
+    data.language = query.language == undefined ? '' : query.language;
     data.ipAddress = ipAddress;
     this._list.push(data);
     //console.log(data);
     this._sqLiteManager.set(data);
 };
 
-LogManager.prototype.get = async function (query, data) {
+AccessManager.prototype.get = async function (query, data) {
     if (query.format == 'csv' || query.format == 'raw') {
         data.format = query.format;
     } else {
@@ -39,7 +39,7 @@ LogManager.prototype.get = async function (query, data) {
     return await this._sqLiteManager.get(data);
 };
 
-LogManager.prototype._dateFormat = function (str, add) {
+AccessManager.prototype._dateFormat = function (str, add) {
     var date = new Date();
     date.setDate(date.getDate() + add);
     var y = date.getFullYear();
@@ -72,14 +72,14 @@ var SQLiteManager = function () {
 SQLiteManager.prototype._constructor = function () {
     console.log('SQLiteManager.prototype._constructor');
     var sqlite = require('sqlite3').verbose();
-    this._db = new sqlite.Database(__dirname + '/log.sqlite');
-    this._db.run("CREATE TABLE IF NOT EXISTS log(_id  integer primary key autoincrement not null, name TEXT, language TEXT, ipaddress TEXT, datetime TIMESTAMP DEFAULT (datetime(CURRENT_TIMESTAMP,'localtime')))");
+    this._db = new sqlite.Database(__dirname + '/access.sqlite');
+    this._db.run("CREATE TABLE IF NOT EXISTS access(_id  integer primary key autoincrement not null, name TEXT, language TEXT, ipaddress TEXT, datetime TIMESTAMP DEFAULT (datetime(CURRENT_TIMESTAMP,'localtime')))");
 };
 
 SQLiteManager.prototype.set = function (data) {
     return new Promise((resolve, reject) => {
         this._db.serialize(() => {
-            var stmt = this._db.prepare('INSERT INTO log(name, language, ipaddress) VALUES(?,?,?)');
+            var stmt = this._db.prepare('INSERT INTO access(name, language, ipaddress) VALUES(?,?,?)');
             stmt.run([data.name, data.language, data.ipAddress]);
             stmt.finalize();
             resolve();
@@ -98,7 +98,7 @@ SQLiteManager.prototype.get = function (data) {
             } else {
                 sqlstr += "SELECT _id, name, language, ipaddress, datetime";
             }
-            sqlstr += " FROM log";
+            sqlstr += " FROM access";
             sqlstr += " WHERE '" + data.startDate + " 00:00:00' <= datetime AND datetime <= '" + data.endDate + " 23:59:59'";
             if (isCount) {
                 sqlstr += " GROUP BY name, language ORDER BY name ASC";

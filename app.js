@@ -9,11 +9,11 @@ var setting = require('./system/Setting').getInstance();
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var apiRouter = require('./routes/api');
-var upload = require('./routes/upload');
-var account = require('./routes/account');
-//var alive = require('./routes/alive');
-var log = require('./routes/log/log');
+var apiRouter = require('./routes/api/api');
+var upload = require('./routes/upload/upload');
+var account = require('./routes/account/account');
+//var alive = require('./routes/alive/alive');
+var access = require('./routes/access/access');
 
 var app = express();
 
@@ -38,7 +38,7 @@ app.use('/api', apiRouter);
 app.use('/upload', upload);
 app.use('/account', account);
 //app.use('/alive', alive);
-app.use('/log', log);
+app.use('/access', access);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

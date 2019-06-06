@@ -1,5 +1,5 @@
 var express = require('express');
-var aliveManager = require('./alive/AliveManager').getInstance();
+var aliveManager = require('./AliveManager').getInstance();
 var router = express.Router();
 
 /* GET users listing. */

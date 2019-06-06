@@ -1,7 +1,7 @@
 var express = require('express');
 var iconv = require('iconv-lite');
 
-var logManager = require('./LogManager').getInstance();
+var accessManager = require('./AccessManager').getInstance();
 var router = express.Router();
 
 /* GET users listing. */
@@ -20,7 +20,7 @@ router.get('/set', function (req, res, next) {
     status: 'success',
     query: req.query
   };
-  logManager.set(req.query, ipAddress);
+  accessManager.set(req.query, ipAddress);
   res.header('Content-Type', 'application/json; charset=utf-8');
   res.header('Access-Control-Allow-Origin: *');
   res.send(param);
@@ -28,14 +28,14 @@ router.get('/set', function (req, res, next) {
 
 router.get('/get', async function (req, res, next) {
   var data = {};
-  var result = await logManager.get(req.query, data);
+  var result = await accessManager.get(req.query, data);
   //console.dir(data);
 
   if (data.format == 'json') {
     var param = {
       status: 'success',
       query: req.query,
-      result: await logManager.get(req.query, data)
+      result: await accessManager.get(req.query, data)
     };
     res.header('Content-Type', 'application/json; charset=utf-8');
     res.header('Access-Control-Allow-Origin: *');

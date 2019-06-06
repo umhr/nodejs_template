@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var accountManager = require('./account/AccountManager').getInstance();
+var accountManager = require('./AccountManager').getInstance();
 
 //router.get('/', function (req, res, next) {});
 

@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var multer = require("multer");
 var fs = require('fs');
-var thumbManager = require('./upload/ThumbManager').getInstance();
+var thumbManager = require('./ThumbManager').getInstance();
 
 //https://github.com/expressjs/multer
 var storage = multer.diskStorage({

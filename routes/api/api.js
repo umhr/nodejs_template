@@ -1,5 +1,5 @@
 var express = require('express');
-var dataManager = require('./api/DataManager').getInstance();
+var dataManager = require('./DataManager').getInstance();
 var router = express.Router();
 
 dataManager.addEventListener('count', watchCount);
