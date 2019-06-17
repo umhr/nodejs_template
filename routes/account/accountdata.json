@@ -2,11 +2,16 @@
     "list": {
         "admin": {
             "pw": "admin",
-            "authority": "su"
+            "authority": [
+                "su",
+                "user"
+            ]
         },
         "user": {
             "pw": "1234",
-            "authority": "user"
+            "authority": [
+                "user"
+            ]
         }
     },
     "maxAge": 60000

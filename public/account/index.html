@@ -12,19 +12,21 @@
 </head>
 
 <body>
+    <div id="msg"></div>
     <div id="log"></div>
 
-    <script type="text/javascript" src="login.js"></script>
+    <script type="text/javascript" src="account.js"></script>
 
     <script type="text/javascript">
-        console.log("login", login);
+        console.log("login", account);
         var innerHTML = "";
-        if (login) {
+        if (account) {
+            document.getElementById("log").innerText = JSON.stringify(account);
             innerHTML = "welcome<br><button onclick='onClick()'>logout</button>";
         } else {
             innerHTML = "<a href='login.html'>login してください。</a>";
         }
-        document.getElementById("log").innerHTML = innerHTML;
+        document.getElementById("msg").innerHTML = innerHTML;
 
         function onClick() {
             document.cookie = "account=; max-age=0; path=/";

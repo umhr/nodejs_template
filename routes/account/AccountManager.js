@@ -41,10 +41,10 @@ AccountManager.prototype.create = function (data) {
   } else if (this._list[id] == undefined) {
     this._list[id] = {
       pw: pw,
-      authority: 'user'
+      authority: ["user"]
     };
     console.log('AccountManager.create 保存機能停止中');
-    //this._save();// 追加分を保存できるようにするにはコメントアウト
+    //this._save(); // 追加分を保存できるようにするにはコメントアウト
     result.status = "success";
     result.messaga = "created";
   } else if (this._list[id]) {
@@ -56,29 +56,32 @@ AccountManager.prototype.create = function (data) {
 
 AccountManager.prototype.contain = function (account) {
   if (account == undefined) {
-    return false;
+    return undefined;
   }
   if (typeof account == "string") {
     try {
       var obj = JSON.parse(account);
     } catch (e) {
-      return false;
+      return undefined;
     }
   } else {
-    return false;
+    return undefined;
   }
 
   var id = obj.id;
   var pw = obj.pw;
   if (id == undefined || pw == undefined) {
-    return false;
+    return undefined;
   } else if (this._list[id] == undefined) {
-    return false;
+    return undefined;
   } else if (typeof this._list[id] != "object") {
-    return false;
+    return undefined;
   } else if (this._list[id].pw == pw) {
-    return true;
+    var account = {};
+    account.id = id;
+    account.authority = this._list[id].authority;
+    return account;
   } else {
-    return false;
+    return undefined;
   }
 };

@@ -1,6 +1,5 @@
 # node_modules フォルダは同期しない。
 node_modules/
-.vscode/
 
 # sqlite ファイルは要らない
 *.sqlite

@@ -4,12 +4,17 @@ var accountManager = require('./AccountManager').getInstance();
 
 //router.get('/', function (req, res, next) {});
 
-router.get('/login.js', function (req, res, next) {
+router.get('/account.js', function (req, res, next) {
   var js = "";
-  if (accountManager.contain(req.cookies.account)) {
-    js = "const login = true;";
+  var obj = accountManager.contain(req.cookies.account);
+  if (obj == undefined) {
+    js = "const account = undefined;";
   } else {
-    js = "const login = false;";
+    js = "const account = " + JSON.stringify(obj) + ";";
+    // 期限のアップデート
+    res.cookie('account', req.cookies.account, {
+      maxAge: accountManager.maxAge
+    });
   }
   res.header('Content-Type', 'text/javascript; charset=utf-8');
   res.send(js);
@@ -19,13 +24,15 @@ router.post('/login', function (req, res, next) {
   var param = {};
   try {
     var json = JSON.stringify(req.body);
-    if (accountManager.contain(json)) {
+    var obj = accountManager.contain(json);
+    if (obj == undefined) {
+      param.status = 'ng';
+    } else {
       param.status = 'success';
+      param.account = obj;
       res.cookie('account', json, {
         maxAge: accountManager.maxAge
       });
-    } else {
-      param.status = 'ng';
     }
   } catch (e) {
     param.status = 'ng';
