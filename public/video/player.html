@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>Video</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+    <style type="text/css">
+        body {
+            margin: 0px;
+        }
+    </style>
+
+    <script>
+        $(function () {
+            var playlist = ['v1.mp4', 'v2.mp4', 'v3.mp4'];
+            var count = 0;
+            $(document).ready(function (e) {
+                console.log('ready');
+            });
+
+            $(window).on('load', function (e) {
+                console.log(e.type);
+                var v = $('#video').get(0);
+                v.src = getNextItem();
+            });
+
+            $('#video').on({
+                'loadedmetadata': function (e) {
+                    console.log(e.type);
+                    var v = e.currentTarget;
+                    var s = Math.min(window.innerWidth / v.videoWidth, window.innerHeight / v
+                        .videoHeight);
+                    v.width = s * v.videoWidth;
+                    v.height = s * v.videoHeight;
+                },
+                'play': function (e) {
+                    console.log(e.type);
+                },
+                'pause': function (e) {
+                    console.log(e.type);
+                },
+                'ended': function (e) {
+                    console.log(e.type);
+                    var v = e.currentTarget;
+                    v.src = getNextItem();
+                },
+                'volumechange': function (e) {
+                    console.log(e.type);
+                },
+                'canplaythrough': function (e) {
+                    console.log(e.type);
+                    var v = e.currentTarget;
+                    v.play();
+                },
+                'timeupdate': function (e) {},
+                'click': function (e) {
+                    console.log(e.type);
+                    $('#video').get(0).controls = true;
+                }
+            });
+
+            function getNextItem() {
+                count %= playlist.length;
+                return playlist[count++];
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <video id="video" autoplay></video>
+    <!-- ユーザーの操作、遷移を伴わない再生時にはmutedにしないと自動再生しない -->
+    <!-- video id="video" controls autoplay muted></video -->
+</body>
+
+</html>

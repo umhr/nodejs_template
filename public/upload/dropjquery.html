@@ -1,0 +1,71 @@
+﻿<html>
+
+<head>
+    <title>drop with jQuery</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+</head>
+
+<body>
+    <div id="droparea" style="width:400px; height:300px; background:#CCCCFF;"></div>
+    <div id="response"></div>
+
+    <script type="text/javascript">
+        setForm();
+
+        function setForm() {
+            if (!(window.FormData)) {
+                return;
+            }
+
+            var element = document.getElementById("droparea");
+
+            element.addEventListener("dragover", function (e) {
+                e.preventDefault();
+            });
+
+            element.addEventListener("drop", function (e) {
+                var dataTransfer = e.dataTransfer;
+                var files = dataTransfer.files;
+                var formData = new FormData();
+                if (files) {
+                    var n = files.length;
+                    var count = 0;
+                    for (var i = 0; i < n; i++) {
+                        var file = files[i];
+                        if (file.type == "image/jpeg" || file.type == "image/png" || file.type == "video/mp4" ||
+                            file.type == "audio/mp3") {
+                            formData.append("upfile", file);
+                            count++;
+                        } else {
+                            console.log(file.type, "指定typeのみ送信できます。");
+                        }
+                        console.dir(file);
+                    };
+                    if (count > 0) {
+                        post(formData);
+                    }
+                }
+
+                e.preventDefault();
+            });
+
+        };
+
+        function post(formData) {
+            var self = this;
+            $.ajax({
+                    url: "../upload?fit=contain&width=300&height=300",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false
+                })
+                .done(function (data) {
+                    console.dir(data);
+                    document.getElementById('response').innerText = data.pathlist;
+                });
+        }
+    </script>
+</body>
+
+</html>

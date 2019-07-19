@@ -1,0 +1,64 @@
+﻿<html>
+
+<head>
+    <title>formData with jQuery</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+</head>
+
+<body>
+    <div><input type="text" id="txt" value="あいうえおかきくけこ"></div>
+    <div><input type="file" name="up"></div>
+    <div><input type="file" name="up"></div>
+    <div><input type="file" name="up"></div>
+
+    <button onclick="onClick()">onClick</button>
+    <div id="response"></div>
+
+    <script type="text/javascript">
+        function onClick() {
+            console.log("onClick");
+            var formData = new FormData();
+            var elementList = document.getElementsByName("up");
+            var n = elementList.length;
+
+            for (var i = 0; i < n; i++) {
+                var element = elementList[i];
+                if (element.files.length > 0) {
+                    var m = element.files.length;
+                    for (var j = 0; j < m; j++) {
+                        var file = element.files[j];
+                        if (file.type == "image/jpeg" || file.type == "image/png" || file.type == "video/mp4" ||
+                            file.type == "audio/mp3") {
+                            formData.append("upfile", file);
+                        } else {
+                            console.log(file.type, "指定typeのみ送信できます。");
+                        }
+                        console.dir(file);
+                    }
+                }
+            }
+
+            formData.append("text", document.getElementById("txt").value);
+            post(formData);
+
+        }
+
+        function post(formData) {
+            var self = this;
+            $.ajax({
+                    url: "../upload?fit=contain&width=300&height=300",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false
+                })
+                .done(function (data) {
+                    console.dir(data);
+                    document.getElementById('response').innerText = data.pathlist;
+                });
+        }
+    </script>
+
+</body>
+
+</html>
