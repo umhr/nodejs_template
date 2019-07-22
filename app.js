@@ -14,6 +14,7 @@ var upload = require('./routes/upload/upload');
 var account = require('./routes/account/account');
 //var alive = require('./routes/alive/alive');
 var access = require('./routes/access/access');
+var video = require('./routes/video/video');
 
 var app = express();
 
@@ -39,6 +40,7 @@ app.use('/upload', upload);
 app.use('/account', account);
 //app.use('/alive', alive);
 app.use('/access', access);
+app.use('/video', video);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

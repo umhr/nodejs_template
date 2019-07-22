@@ -1,0 +1,144 @@
+﻿<html>
+
+<head>
+    <title>manager</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <style type="text/css">
+        body {
+            background-color: #EEEEEE;
+        }
+
+        .cell {
+            display: inline-block;
+            background-color: dimgray;
+            color: aliceblue;
+            border-radius: 5px;
+            margin: 5px;
+            padding: 10px;
+        }
+
+        video {
+            width: 320px;
+        }
+
+        #uploader {
+            background-color: darkgray;
+            border-radius: 5px;
+            margin: 5px;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="list"></div>
+    <div id="uploader">
+        <div><input type="file" name="up"></div>
+        <div><input type="file" name="up"></div>
+        <div><input type="file" name="up"></div>
+        <button onclick="onUpload()">upload</button>
+    </div>
+
+    <div id="response"></div>
+
+    <script type="text/javascript">
+        var playlist = [];
+
+        loadPlaylist();
+
+        function loadPlaylist() {
+            $.ajax({
+                url: 'files',
+                type: 'get',
+                dataType: 'json',
+                timeout: 3000,
+            }).done(function (data) {
+                console.dir(data);
+                playlist = data.list;
+                setList();
+                document.getElementById('response').innerText = JSON.stringify(data);
+            }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log("error");
+            });
+        }
+
+        function setList() {
+            var html = '';
+            var n = playlist.length;
+            for (var i = 0; i < n; i++) {
+                html += '<div class="cell">';
+                html += playlist[i] + '<br>';
+                html += '<video src="files/' + playlist[i] + '" poster="files/' + playlist[i] +
+                    '.jpg" preload="none" controls></video>';
+                html += '<br>';
+                html += '<button onclick="onDelete(' + i + ')">削除</button>';
+                html += '</div>';
+            }
+            $('#list').html(html);
+        }
+
+        function onDelete(index) {
+            console.log("onDelete", index);
+
+            $.ajax({
+                    url: "files/" + playlist[index],
+                    type: "DELETE",
+                    processData: false,
+                    contentType: false
+                })
+                .done(function (data) {
+                    console.dir(data);
+                    if (data.status == 'success') {
+                        loadPlaylist();
+                    }
+                    document.getElementById('response').innerText = JSON.stringify(data);
+                });
+        }
+
+        function onUpload() {
+            console.log("onUpload");
+            var formData = new FormData();
+            var elementList = document.getElementsByName("up");
+            var n = elementList.length;
+
+            for (var i = 0; i < n; i++) {
+                var element = elementList[i];
+                if (element.files.length > 0) {
+                    var m = element.files.length;
+                    for (var j = 0; j < m; j++) {
+                        var file = element.files[j];
+                        if (file.type == "image/jpeg" ||
+                            file.type == "image/png" || file.type == "video/mp4" || file.type == "audio/mp3") {
+                            formData.append("upfile", file);
+                        } else {
+                            console.log(file.type, "指定typeのみ送信できます。");
+                        }
+                    }
+                }
+                console.dir(element);
+                //element.value = 'aaa';
+            }
+            formData.append("text", document.getElementById("txt").value);
+            post(formData);
+        }
+
+        function post(formData) {
+            var self = this;
+            $.ajax({
+                    url: "../video/files?fit=contain&width=320&height=180",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false
+                })
+                .done(function (data) {
+                    console.dir(data);
+                    loadPlaylist();
+                    document.getElementById('response').innerText = JSON.stringify(data);
+                });
+        }
+    </script>
+
+</body>
+
+</html>

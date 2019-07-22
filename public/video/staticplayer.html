@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>player</title>
+    <title>static player</title>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 
     <style type="text/css">
@@ -15,7 +15,7 @@
 
     <script>
         $(function () {
-            var playlist = ['v1.mp4', 'v2.mp4', 'v3.mp4'];
+            var playlist = ['files/v1.mp4', 'files/v2.mp4', 'files/v3.mp4'];
             var count = 0;
             $(document).ready(function (e) {
                 console.log('ready');
@@ -23,25 +23,9 @@
 
             $(window).on('load', function (e) {
                 console.log(e.type);
-                onLoad();
+                var v = $('#video').get(0);
+                v.src = getNextItem();
             });
-
-            function onLoad() {
-                $.ajax({
-                    url: 'files',
-                    type: 'get',
-                    dataType: 'json',
-                    timeout: 3000,
-                }).done(function (data) {
-                    console.dir(data);
-                    playlist = data.list;
-                    count = 0;
-                    var v = $('#video').get(0);
-                    v.src = getNextItem();
-                }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
-                    console.log("error");
-                });
-            }
 
             $('#video').on({
                 'loadedmetadata': function (e) {
@@ -75,19 +59,12 @@
                 'click': function (e) {
                     console.log(e.type);
                     $('#video').get(0).controls = true;
-                },
-                'error': function (e) {
-                    console.log(e.type);
-                    onLoad();
                 }
             });
 
             function getNextItem() {
-                if (count == playlist.length) {
-                    onLoad();
-                }
                 count %= playlist.length;
-                return 'files/' + playlist[count++];
+                return playlist[count++];
             }
         });
     </script>
