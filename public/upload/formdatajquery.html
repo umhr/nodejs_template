@@ -46,7 +46,7 @@
         function post(formData) {
             var self = this;
             $.ajax({
-                    url: "../upload?fit=contain&width=300&height=300",
+                    url: "../upload/upfile?fit=contain&width=300&height=300",
                     type: "POST",
                     data: formData,
                     processData: false,
@@ -54,7 +54,7 @@
                 })
                 .done(function (data) {
                     console.dir(data);
-                    document.getElementById('response').innerText = data.pathlist;
+                    document.getElementById('response').innerText = JSON.stringify(data);
                 });
         }
     </script>

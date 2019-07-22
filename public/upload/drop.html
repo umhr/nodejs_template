@@ -42,7 +42,7 @@
                     };
                     if (count > 0) {
                         var xhr = new XMLHttpRequest();
-                        xhr.open("POST", "../upload?fit=cover&width=200&height=200");
+                        xhr.open("POST", "../upload/upfile?fit=cover&width=200&height=200");
                         xhr.send(formData);
                         xhr.addEventListener("load", function () {
                             console.log(this.response);

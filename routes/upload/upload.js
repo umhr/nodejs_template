@@ -8,8 +8,11 @@ var thumbManager = require('./ThumbManager').getInstance();
 var storage = multer.diskStorage({
   // ファイルの保存先を指定
   destination: function (req, file, cb) {
-    console.log("destination");
-    var filepath = 'public/upload/upfile';
+    console.log("destination", req.params.command);
+    var filepath = 'public/upload';
+    if (req.params.command != undefined) {
+      filepath += '/' + req.params.command;
+    }
     if (!fs.existsSync(filepath) || !fs.statSync(filepath).isDirectory()) {
       fs.mkdirSync(filepath);
     }
@@ -33,9 +36,7 @@ var upload = multer({
   }
 });
 
-router.post('/', upload.array('upfile'), async function (req, res) {
-  console.log('upfile');
-
+var thumb_res = async function (req, res) {
   if (req.body) {
     var object = req.body;
     for (const key in object) {
@@ -56,7 +57,6 @@ router.post('/', upload.array('upfile'), async function (req, res) {
       }
       pathlist.push(path);
     }
-
   }
 
   res.header('Content-Type', 'application/json; charset=utf-8');
@@ -66,7 +66,11 @@ router.post('/', upload.array('upfile'), async function (req, res) {
     body: req.body,
     pathlist: pathlist
   });
-});
+}
 
+router.post('/', upload.array('upfile'), thumb_res);
+
+// command のディレクトリ内に保存
+router.post('/:command', upload.array('upfile'), thumb_res);
 
 module.exports = router;

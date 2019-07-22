@@ -39,7 +39,7 @@
 
             formData.append("text", document.getElementById("txt").value);
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "../upload?fit=contain&width=300&height=300");
+            xhr.open("POST", "../upload/upfile?fit=contain&width=300&height=300");
             xhr.send(formData);
             xhr.addEventListener("load", function () {
                 console.log(this.response);
