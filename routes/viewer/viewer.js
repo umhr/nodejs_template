@@ -3,53 +3,31 @@ var router = express.Router();
 var fs = require('fs');
 var multer = require("multer");
 var thumbManager = require('../upload/ThumbManager').getInstance();
+var viewerManagerFactory = require('./ViewerManager');
 
 router.get('/', function (req, res, next) {
   console.log(req.url);
   var param = {
     url: req.url,
-    command: req.query.command
+    command: req.query.command,
+    list: viewerManagerFactory.getList()
   };
-  res.header('Content-Type', 'application/json; charset=utf-8')
+  res.header('Content-Type', 'application/json; charset=utf-8');
+  res.header('Access-Control-Allow-Origin: *');
   res.send(param);
 });
 
-router.get('/files', function (req, res, next) {
-  console.log(req.url);
-  var files = fs.readdirSync('./public/video/files');
-  var list = files.filter(function (file) {
-    if (file.toLocaleLowerCase().lastIndexOf('.mp4') == file.length - '.mp4'.length) {
-      return true;
-    } else {
-      return false;
-    }
-  })
-
+router.get('/:dir/list', function (req, res, next) {
+  console.log(req.url, req.params.dir);
+  var name = req.params.dir;
+  var viewerManager = viewerManagerFactory.getInstance(name);
+  var tempList = viewerManager.getList();
   var param = {
     url: req.url,
-    list: list
+    list: tempList
   };
-  res.header('Content-Type', 'application/json; charset=utf-8')
-  res.send(param);
-});
-
-router.delete('/files/:name', function (req, res, next) {
-  console.dir(req.params);
-  var status = 'ng';
-  try {
-    fs.unlinkSync('./public/video/files/' + req.params.name);
-    fs.unlinkSync('./public/video/files/' + req.params.name + '.jpg');
-    status = 'success';
-    console.log('./public/video/files/' + req.params.name + '削除しました。');
-  } catch (error) {
-    throw error;
-  }
-
-  var param = {
-    status: status,
-    url: req.url
-  };
-  res.header('Content-Type', 'application/json; charset=utf-8')
+  res.header('Content-Type', 'application/json; charset=utf-8');
+  res.header('Access-Control-Allow-Origin: *');
   res.send(param);
 });
 
@@ -57,11 +35,8 @@ router.delete('/files/:name', function (req, res, next) {
 var storage = multer.diskStorage({
   // ファイルの保存先を指定
   destination: function (req, file, cb) {
-    console.log("destination", req.params.command);
-    var filepath = 'public/video/files';
-    if (req.params.command != undefined) {
-      filepath += '/' + req.params.command;
-    }
+    console.log("destination", req.params.dir);
+    var filepath = 'public/viewer/' + req.params.dir + '/assets';
     if (!fs.existsSync(filepath) || !fs.statSync(filepath).isDirectory()) {
       fs.mkdirSync(filepath);
     }
@@ -101,14 +76,16 @@ var thumb_res = async function (req, res) {
       var path = '';
       if (upfileObj.mimetype == "video/mp4") {
         path = await thumbManager.video(upfileObj, req.query);
+        pathlist.push(path);
       } else if (upfileObj.mimetype == "image/jpeg" || upfileObj.mimetype == "image/png") {
-        path = await thumbManager.image(upfileObj, req.query);
+        //path = await thumbManager.image(upfileObj, req.query);
       }
-      pathlist.push(path);
+      //pathlist.push(path);
     }
   }
 
   res.header('Content-Type', 'application/json; charset=utf-8');
+  res.header('Access-Control-Allow-Origin: *');
   res.json({
     result: 'success',
     query: req.query,
@@ -117,7 +94,21 @@ var thumb_res = async function (req, res) {
   });
 }
 
-// command のディレクトリ内に保存
-router.post('/files', upload.array('upfile'), thumb_res);
+router.post('/:dir/assets', upload.array('upfile'), thumb_res);
+
+router.post('/:dir/list', function (req, res, next) {
+  console.log(req.url);
+  var name = req.params.dir;
+  var viewerManager = viewerManagerFactory.getInstance(name);
+  var list = viewerManager.setList(JSON.parse(req.body.list));
+
+  var param = {
+    url: req.url,
+    list: list
+  };
+  res.header('Content-Type', 'application/json; charset=utf-8');
+  res.header('Access-Control-Allow-Origin: *');
+  res.send(param);
+});
 
 module.exports = router;

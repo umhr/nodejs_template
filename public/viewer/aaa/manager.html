@@ -17,20 +17,32 @@
             padding: 10px;
         }
 
-        video {
+        .small {
+            font-size: small;
+        }
+
+        .preview {
             width: 320px;
         }
 
+        #header,
         #uploader {
             background-color: darkgray;
             border-radius: 5px;
             margin: 5px;
             padding: 10px;
         }
+
+        .duration {
+            width: 50px;
+            text-align: right;
+        }
     </style>
 </head>
 
 <body>
+    <div id="header"><button onclick="onSave()">Save</button><button onclick="onPreview()">Preview</button>
+    </div>
     <div id="list"></div>
     <div id="uploader">
         <div><input type="file" name="up"></div>
@@ -48,7 +60,7 @@
 
         function loadPlaylist() {
             $.ajax({
-                url: 'files',
+                url: 'list',
                 type: 'get',
                 dataType: 'json',
                 timeout: 3000,
@@ -66,12 +78,31 @@
             var html = '';
             var n = playlist.length;
             for (var i = 0; i < n; i++) {
+                var url = playlist[i].url;
+                var isVideo = url.toLocaleLowerCase().lastIndexOf('.mp4') == url.length - '.mp4'.length;
                 html += '<div class="cell">';
-                html += playlist[i] + '<br>';
-                html += '<video src="files/' + playlist[i] + '" poster="files/' + playlist[i] +
-                    '.jpg" preload="none" controls></video>';
-                html += '<br>';
-                html += '<button onclick="onDelete(' + i + ')">削除</button>';
+                html += '<div>表示順：';
+                if (i != 0) {
+                    html += '<button onclick="onUp(' + i + ')">←</button>';
+                }
+                html += (i + 1);
+                if (i == n - 1) {
+                    html += '<button onclick="onDelete(' + i + ')">delete</button>';
+                } else {
+                    html += '<button onclick="onDown(' + i + ')">→</button>';
+                }
+                html += '</div>';
+                html += '<div class="small">' + url + '</div>';
+                if (isVideo) {
+                    html += '<video class="preview" src="assets/' + url + '" poster="assets/' + url +
+                        '.jpg" preload="none" controls></video>';
+                } else {
+                    html += '<img class="preview" src="assets/' + url + '">';
+                }
+                if (!isVideo) {
+                    html += '<div>表示時間：<input type="number" size="3" class="duration" value="' + playlist[i]
+                        .duration + '" onchange="onDuration(' + i + ', this)"></div>';
+                }
                 html += '</div>';
             }
             $('#list').html(html);
@@ -79,20 +110,8 @@
 
         function onDelete(index) {
             console.log("onDelete", index);
-
-            $.ajax({
-                    url: "files/" + playlist[index],
-                    type: "DELETE",
-                    processData: false,
-                    contentType: false
-                })
-                .done(function (data) {
-                    console.dir(data);
-                    if (data.status == 'success') {
-                        loadPlaylist();
-                    }
-                    document.getElementById('response').innerText = JSON.stringify(data);
-                });
+            playlist.length--;
+            setList();
         }
 
         function onUpload() {
@@ -115,17 +134,57 @@
                         }
                     }
                 }
-                console.dir(element);
-                //element.value = 'aaa';
             }
-            formData.append("text", document.getElementById("txt").value);
             post(formData);
+        }
+
+        function onDuration(index, self) {
+            console.log('onDuration ' + index);
+            //console.dir(self.value);
+            playlist[index].duration = parseInt(self.value);
+        }
+
+        function onUp(index) {
+            console.log('onUp ' + index);
+            var temp = playlist[index - 1];
+            playlist[index - 1] = playlist[index];
+            playlist[index] = temp;
+            setList();
+        }
+
+        function onDown(index) {
+            console.log('onDown ' + index);
+            var temp = playlist[index + 1];
+            playlist[index + 1] = playlist[index];
+            playlist[index] = temp;
+            setList();
+        }
+
+        function onSave() {
+            console.log('onSave');
+            console.dir(playlist);
+            var data = {
+                list: JSON.stringify(playlist)
+            };
+            $.ajax({
+                    url: "list",
+                    type: "POST",
+                    data: data
+                })
+                .done(function (data) {
+                    console.dir(data);
+                    document.getElementById('response').innerText = JSON.stringify(data);
+                });
+        }
+
+        function onPreview() {
+            window.open('./', '_blank');
         }
 
         function post(formData) {
             var self = this;
             $.ajax({
-                    url: "../video/files?fit=contain&width=320&height=180",
+                    url: "assets?fit=contain&width=320&height=180",
                     type: "POST",
                     data: formData,
                     processData: false,

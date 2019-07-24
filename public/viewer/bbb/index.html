@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>viewer</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+    <style type="text/css">
+        body {
+            margin: 0px;
+            background-color: black;
+        }
+
+        video,
+        img {
+            width: 100%;
+        }
+
+        #bar {
+            position: absolute;
+            top: 0px;
+            background-color: gray;
+            opacity: 0.5;
+            width: 0%;
+            height: 5px;
+
+        }
+    </style>
+
+    <script>
+        $(function () {
+            var playlist = [];
+            var count = 0;
+            $(document).ready(function (e) {
+                console.log('ready');
+            });
+
+            $(window).on('load', function (e) {
+                console.log(e.type);
+                onLoad(true);
+            });
+
+            function onLoad(isPrimary) {
+                $.ajax({
+                    url: 'list',
+                    type: 'get',
+                    dataType: 'json',
+                    timeout: 3000,
+                }).done(function (data) {
+                    console.dir(data);
+                    playlist = data.list;
+                    if (isPrimary) {
+                        play();
+                    }
+                }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                    console.log("error");
+                });
+            }
+
+            function play() {
+                var obj = getNextItem();
+                console.log(obj.duration, obj.url);
+                var url = obj.url;
+                var isVideo = url.toLocaleLowerCase().lastIndexOf('.mp4') == url.length - '.mp4'.length;
+                if (isVideo) {
+                    $('#img').hide();
+                    $('#video').show();
+                    var v = $('#video').get(0);
+                    v.src = 'assets/' + url;
+                } else {
+                    $('#img').show();
+                    $('#video').hide();
+                    var v = $('#img').get(0);
+                    v.src = 'assets/' + url;
+                    var duration = obj.duration * 1000;
+                    $('#bar').animate({
+                        width: '100%'
+                    }, duration, 'linear', function () {
+                        $('#bar').css('width', '0%');
+                        play();
+                    })
+                }
+            }
+
+            $('#video').on({
+                'loadedmetadata': function (e) {
+                    console.log(e.type);
+                    var v = e.currentTarget;
+                    var s = Math.min(window.innerWidth / v.videoWidth, window.innerHeight / v
+                        .videoHeight);
+                    v.width = s * v.videoWidth;
+                    v.height = s * v.videoHeight;
+                },
+                'play': function (e) {
+                    console.log(e.type);
+                },
+                'pause': function (e) {
+                    console.log(e.type);
+                },
+                'ended': function (e) {
+                    console.log(e.type);
+                    play();
+                },
+                'volumechange': function (e) {
+                    console.log(e.type);
+                },
+                'canplaythrough': function (e) {
+                    console.log(e.type);
+                    var v = e.currentTarget;
+                    v.play();
+                },
+                'timeupdate': function (e) {},
+                'click': function (e) {
+                    console.log(e.type);
+                    $('#video').get(0).controls = true;
+                },
+                'error': function (e) {
+                    console.log(e.type);
+                    onLoad(false);
+                }
+            });
+
+            function getNextItem() {
+                if (count == playlist.length) {
+                    onLoad(false);
+                }
+                count %= playlist.length;
+                return playlist[count++];
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <video id="video" autoplay></video>
+    <!-- ユーザーの操作、遷移を伴わない再生時にはmutedにしないと自動再生しない -->
+    <!-- video id="video" controls autoplay muted></video -->
+    <img id="img">
+    <div id="bar"></div>
+</body>
+
+</html>

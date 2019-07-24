@@ -44,7 +44,7 @@ ThumbManager.prototype.video = function (file, query) {
   var w = parseInt(query.width) || -1;
   var h = parseInt(query.height) || -1;
 
-  var AppPath = 'C:\\inetpub\\ffmpeg-20180820-78d4b6b-win64-static\\bin\\ffmpeg.exe';
+  var AppPath = 'D:\\inetpub\\ffmpeg-20180820-78d4b6b-win64-static\\bin\\ffmpeg.exe';
   var scale;
   if (fit == 'cover') {
     scale = ' -vf "scale=' + w + ':' + h + ':force_original_aspect_ratio=increase,crop=' + w + ':' + h + '"';
