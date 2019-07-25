@@ -14,6 +14,7 @@
 
         video,
         img {
+            display: none;
             width: 100%;
         }
 
@@ -38,8 +39,9 @@
 
             $(window).on('load', function (e) {
                 console.log(e.type);
-                onLoad(true);
+                //onLoad(true);
             });
+            onLoad(true);
 
             function onLoad(isPrimary) {
                 $.ajax({
@@ -59,18 +61,17 @@
             }
 
             function play() {
+                $('#img').hide();
                 var obj = getNextItem();
                 console.log(obj.duration, obj.url);
                 var url = obj.url;
                 var isVideo = url.toLocaleLowerCase().lastIndexOf('.mp4') == url.length - '.mp4'.length;
                 if (isVideo) {
                     $('#img').hide();
-                    $('#video').show();
                     var v = $('#video').get(0);
                     v.src = 'assets/' + url;
                 } else {
                     $('#img').show();
-                    $('#video').hide();
                     var v = $('#img').get(0);
                     v.src = 'assets/' + url;
                     var duration = obj.duration * 1000;
@@ -109,6 +110,7 @@
                     console.log(e.type);
                     var v = e.currentTarget;
                     v.play();
+                    $('#video').show();
                 },
                 'timeupdate': function (e) {},
                 'click': function (e) {
