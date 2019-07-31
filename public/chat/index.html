@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>socket.io</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="../libs/socket.io/2.2.0/socket.io.js"></script>
+    <style type="text/css">
+        body {
+            background-color: #666666;
+            margin: 0;
+        }
+
+
+        #inputarea {
+            position: absolute;
+            bottom: 0px;
+            width: calc(100vw - 20px);
+            padding: 10px;
+            background-color: #f5f5f5;
+        }
+
+        textarea,
+        input {
+            margin: 0px;
+            height: 20px;
+            border-radius: 4px;
+            border: solid 1px #DDDDDD;
+            background-color: #EEEEEE;
+        }
+
+        #name {
+            width: 120px;
+        }
+
+        #message {
+            width: calc(100vw - 20px - 120px - 50px - 20px);
+        }
+
+        #btn {
+            width: 50px;
+        }
+
+        /*以下、①背景色など*/
+        #talkarea {
+            padding: 20px 10px;
+            text-align: right;
+            font-size: 14px;
+            background: #7da4cd;
+            /*height: calc(100vh - 48px);*/
+        }
+
+        /*以下、②左側のコメント*/
+        .balloon-left {
+            width: 100%;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .balloon-left .icon {
+            float: left;
+            margin-right: -50px;
+            width: 40px;
+        }
+
+        .balloon-left .icon img {
+            width: 100%;
+            height: auto;
+            border-radius: 50%;
+        }
+
+        .balloon-left .chatting {
+            width: 100%;
+            text-align: left;
+        }
+
+        .says {
+            display: inline-block;
+            position: relative;
+            margin: 0 0 0 50px;
+            padding: 10px;
+            max-width: 250px;
+            border-radius: 12px;
+            background: #f5f5f5;
+        }
+
+        .says:after {
+            content: "";
+            display: inline-block;
+            position: absolute;
+            top: 3px;
+            left: -19px;
+            border: 8px solid transparent;
+            border-right: 18px solid #f5f5f5;
+            -webkit-transform: rotate(35deg);
+            transform: rotate(35deg);
+        }
+
+        .says p {
+            margin: 0;
+            padding: 0;
+        }
+
+        /*以下、③右側の緑コメント*/
+        .balloon-right {
+            margin: 10px 0;
+        }
+
+        .balloon-right p {
+            display: inline-block;
+            position: relative;
+            margin: 0 10px 0 0;
+            padding: 8px;
+            max-width: 250px;
+            border-radius: 12px;
+            background: #b2ed8b;
+            font-size: 15px;
+        }
+
+        .balloon-right p:after {
+            content: "";
+            position: absolute;
+            top: 3px;
+            right: -19px;
+            border: 8px solid transparent;
+            border-left: 18px solid #b2ed8b;
+            -webkit-transform: rotate(-35deg);
+            transform: rotate(-35deg);
+        }
+
+        .name {
+            font-size: x-small;
+            color: white;
+            margin-left: 45px;
+        }
+
+        .time {
+            font-size: x-small;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="talkarea">
+    </div>
+    <div id="inputarea">
+        <input type="text" name="name" id="name" placeholder="名前">
+        <textarea name="message" id="message" rows="1" onchange="onChange()">部品を無効化</textarea>
+        <!-- input type="text" id="message" placeholder="メッセージ" -->
+        <button id="btn" onclick="onSend()">送信</button>
+    </div>
+    <div id="log"></div>
+
+    <script type="text/javascript">
+        setTalk();
+        var url = window.location.origin + '/api';
+        this.socket = io.connect(url);
+        // emit は送る
+        this.socket.emit('login', {
+            id: 'id'
+        });
+
+        // on 受け取る
+        this.socket.on('setup', (data) => {
+            $('input[name]').val(data.count);
+        });
+
+        this.socket.on('receive', (data) => {
+            console.log('receive がありました。', data);
+            $('#log').text(JSON.stringify(data));
+            $('input[name]').val(data.count);
+        });
+
+        function setTalk() {
+            console.log('setTalk');
+            var list = [{
+                id: 'a11',
+                name: '山田',
+                time: '13:47',
+                text: 'こんにちは'
+            }, {
+                id: 'b13',
+                time: '13:51',
+                text: 'どういたしまして！'
+            }];
+            var html = '';
+            var n = list.length;
+            for (var i = 0; i < n; i++) {
+                console.log(i);
+                var index = n - i - 1;
+                if (list[index].id == 'b13') {
+                    html += '<div class="balloon-right"><div class="time">';
+                    html += list[index].time;
+                    html += '</div><p>';
+                    html += list[index].text;
+                    html += '</p></div>';
+                } else {
+                    html += '<div class="balloon-left">';
+                    html += '<div class="icon">';
+                    html += getImg(list[index].name);
+                    html += '</div>';
+                    html += '<div class="chatting"><div class="name">';
+                    html += list[index].name + ' ' + list[index].time;
+                    html += '</div><div class="says"><p>';
+                    html += list[index].text;
+                    html += '</p></div></div>';
+                    html += '</div>';
+                }
+            }
+            $('#talkarea').html(html);
+
+        }
+
+        function getImg(id) {
+            var ele = document.createElement('canvas');
+            ele.width = 40;
+            ele.height = 40;
+            var ctx = ele.getContext('2d');
+            ctx.fillStyle = 'rgb(51, 51, 51)';
+            ctx.fillRect(0, 0, 40, 40);
+            ctx.fill();
+            ctx.translate(10, 20);
+            ctx.fillStyle = 'rgb(255, 255, 255)';
+            ctx.font = "14px 'ヒラギノ角ゴシック'";
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            //var metrics = this.measureText(name);
+            ctx.fillText(id, 10, 0);
+            ctx.textAlign = 'start';
+            ctx.textBaseline = 'alphabetic';
+            ctx.translate(-10, -20);
+
+            var html = '<img src="' + ele.toDataURL() + '">';
+            return html;
+        }
+
+        function onSend() {
+
+            var name = $('#name').val();
+            var message = $('#message').val();
+            //$('#message').val('');
+            console.log(name, message);
+
+            /*
+                this.socket.emit('set', {
+                    count: num
+                });
+                */
+        }
+
+        function onChange() {
+            console.log('onChange()');
+        }
+        $('#message').on({
+            keyup: function (e) {
+                if (e.keyCode === 13) {
+                    var value = this.value;
+                    console.log('dddd()');
+                    console.log(value.indexOf('\n'));
+                    var count = (value.match(/\n/g) || []).length;
+                    console.log(count);
+                    //this.height = count * 40 + 'px';
+                    $('#message').attr('rows', count + 1)
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
