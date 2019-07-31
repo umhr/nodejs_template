@@ -15,6 +15,7 @@ var account = require('./routes/account/account');
 //var alive = require('./routes/alive/alive');
 var access = require('./routes/access/access');
 var viewer = require('./routes/viewer/viewer');
+var chat = require('./routes/chat/chat');
 
 var app = express();
 
@@ -41,6 +42,7 @@ app.use('/account', account);
 //app.use('/alive', alive);
 app.use('/access', access);
 app.use('/viewer', viewer);
+app.use('/chat', chat);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -61,6 +63,7 @@ app.use(function (err, req, res, next) {
 app.setIO = (io) => {
   //console.log('app.hoge');
   apiRouter.setIO(io);
+  chat.setIO(io);
 }
 
 console.log(setting.get('title'));
