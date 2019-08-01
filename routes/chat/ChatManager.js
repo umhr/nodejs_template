@@ -1,15 +1,21 @@
-exports.getInstance = function () {
-    return new ChatManager();
+exports.getInstance = function (name) {
+    if (_nameList[name] == undefined) {
+        _nameList[name] = new ChatManager(name);
+    }
+    return _nameList[name];
 };
+var _nameList = {};
 
-var ChatManager = function () {
+var ChatManager = function (name) {
+    this.name = name;
     this._list = [];
     this._listenerList = [];
+    this._idlist = [];
     this._constructor();
 }
 
 ChatManager.prototype._constructor = function () {
-    console.log('ChatManager._constructor');
+    console.log('ChatManager._constructor', this.name);
     this._list = [{
         id: 'abcdefg123456',
         name: '木村 次郎',
@@ -35,6 +41,31 @@ ChatManager.prototype.setList = function (data) {
     }
     this.dispatchEvent('message', this._list);
     return this._list;
+};
+
+ChatManager.prototype.dispose = function (id) {
+    this._idlist.splice(this._idlist.indexOf(id), 1);
+
+    console.log('dispose', id, this._idlist);
+    if (this._idlist.length == 0) {
+        console.log('roomを削除します。', this.name);
+        this._list = null;
+        this._listenerList = null;
+        this._idlist = null;
+        _nameList[this.name] = null;
+        delete _nameList[this.name];
+        delete this;
+    }
+};
+
+ChatManager.prototype.setid = function (id) {
+    var n = this._idlist.length;
+    for (var i = 0; i < n; i++) {
+        if (this._idlist[i] == id) {
+            return;
+        }
+    }
+    this._idlist.push(id);
 };
 
 ChatManager.prototype._time = function () {

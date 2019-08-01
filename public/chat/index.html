@@ -158,11 +158,13 @@
     <div id="log"></div>
 
     <script type="text/javascript">
+        var query = getQuery();
+        var roomid = query.roomid;
         var url = window.location.origin + '/chat';
         this.socket = io.connect(url);
         // emit は送る
         this.socket.emit('login', {
-            id: 'id'
+            roomid: roomid
         });
 
         // on 受け取る
@@ -196,6 +198,7 @@
             for (var i = 0; i < n; i++) {
                 var index = n - i - 1;
                 var message = decodeURIComponent(list[index].message);
+                var name = decodeURIComponent(list[index].name);
                 if (list[index].id == id) {
                     html += '<div class="balloon-right"><div class="time">';
                     html += list[index].time;
@@ -205,10 +208,10 @@
                 } else {
                     html += '<div class="balloon-left">';
                     html += '<div class="icon">';
-                    html += getImg(list[index].id, list[index].name);
+                    html += getImg(list[index].id, name);
                     html += '</div>';
                     html += '<div class="chatting"><div class="name">';
-                    html += list[index].name + ' ' + list[index].time;
+                    html += name + ' ' + list[index].time;
                     html += '</div><div class="says"><p>';
                     html += message;
                     html += '</p></div></div>';
@@ -250,7 +253,7 @@
 
         function onSend() {
             var data = {};
-            data.name = $('#name').val();
+            data.name = encodeURIComponent($('#name').val());
             var message = $('#message').val();
             message = message.replace(/\n/g, '<br>');
             data.message = encodeURIComponent(message);
@@ -270,6 +273,21 @@
                 }
             }
         });
+
+        function getQuery() {
+            if (window.location.search === "") return;
+            const variables = window.location.search.split("?")[1].split("&");
+            const obj = {};
+            variables.forEach(function (v, i) {
+                const variable = v.split("=");
+                if (isNaN(Number(variable[1]))) {
+                    obj[variable[0]] = variable[1];
+                } else {
+                    obj[variable[0]] = Number(variable[1]);
+                }
+            });
+            return obj;
+        }
     </script>
 </body>
 
