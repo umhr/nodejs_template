@@ -43,7 +43,7 @@ var thumb_res = async function (req, res) {
       console.log(key, object[key]);
     }
   }
-
+  var senddata = [];
   var pathlist = [];
   if (req.files) {
     var n = req.files.length;
@@ -56,6 +56,8 @@ var thumb_res = async function (req, res) {
         path = await thumbManager.image(upfileObj, req.query);
       }
       pathlist.push(path);
+      senddata.push(upfileObj);
+      //console.dir(upfileObj);
     }
   }
 
@@ -64,7 +66,8 @@ var thumb_res = async function (req, res) {
     result: 'success',
     query: req.query,
     body: req.body,
-    pathlist: pathlist
+    pathlist: pathlist,
+    senddata: senddata
   });
 }
 
