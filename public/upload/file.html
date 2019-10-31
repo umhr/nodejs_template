@@ -1,0 +1,79 @@
+﻿<html>
+
+<head>
+    <title>formData</title>
+</head>
+
+<body>
+    <div><input type="text" id="txt" value="あいうえおかきくけこ"></div>
+    <div><input type="file" name="up"></div>
+    <div><input type="file" name="up"></div>
+    <div><input type="file" name="up"></div>
+
+    <button onclick="onClick()">upload</button>
+    <div id="list"></div>
+    <hr>
+    <div id="response"></div>
+
+    <script type="text/javascript">
+        function onClick() {
+            console.log("onClick");
+            var self = this;
+            var formData = new FormData();
+            var elementList = document.getElementsByName("up");
+            var n = elementList.length;
+            var query = '';
+
+            for (var i = 0; i < n; i++) {
+                var element = elementList[i];
+                if (element.files.length > 0) {
+                    var m = element.files.length;
+                    for (var j = 0; j < m; j++) {
+                        var file = element.files[j];
+                        if (file.type == "image/jpeg" || file.type == "image/png" || file.type == "video/mp4" ||
+                            file.type == "audio/mp3") {
+                            formData.append("upfile", file);
+                            query = '?fit=contain&width=300&height=300';
+                        } else {
+                            //console.log(file.type, "指定typeのみ送信できます。");
+                            formData.append("upfile", file);
+                        }
+                        console.dir(file);
+                    }
+                }
+                //console.dir(document.getElementsByName("up")[i]);
+                document.getElementsByName("up")[i].value = '';
+            }
+
+            formData.append("text", document.getElementById("txt").value);
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "../upload/upfile" + query);
+            xhr.send(formData);
+            xhr.addEventListener("load", function () {
+                console.log(this.response);
+                document.getElementById('response').innerText = this.response;
+                var res = JSON.parse(this.response);
+                if (res != undefined && res.senddata != undefined) {
+                    setList(res.senddata)
+                }
+            }, false);
+        }
+
+        function setList(list) {
+            var html = 'ファイルがアップロードできました。<br>';
+            var n = list.length;
+            for (var i = 0; i < n; i++) {
+                html += i + 1;
+                html += '：';
+                html += list[i].originalname;
+                html += '（';
+                html += list[i].size;
+                html += 'byte）<br>';
+            }
+            document.getElementById("list").innerHTML = html;
+        }
+    </script>
+
+</body>
+
+</html>

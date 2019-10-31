@@ -6,7 +6,7 @@
 var setting = require('../system/Setting').getInstance();
 var app = require('../app');
 var debug = require('debug')('nodejs-template:server');
-var http = require('http');
+//var http = require('http');
 
 /**
  * Get port from environment and store in Express.
@@ -16,11 +16,26 @@ var http = require('http');
 var port = normalizePort(process.env.PORT || setting.get('port'));
 app.set('port', port);
 
-/**
- * Create HTTP server.
- */
+var protocol = setting.get('protocol') == 'https' ? 'https' : 'http';
 
-var server = http.createServer(app);
+var server;
+if (protocol == 'https') {
+  var pem = setting.get('pem');
+  const fs = require('fs');
+  const privateKey = fs.readFileSync(pem.privateKey, 'utf8');
+  const certificate = fs.readFileSync(pem.certificate, 'utf8');
+  const ca = fs.readFileSync(pem.ca, 'utf8');
+  const credentials = {
+    key: privateKey,
+    cert: certificate,
+    ca: ca
+  };
+  var https = require('https');
+  server = https.createServer(credentials, app);
+} else {
+  var http = require('http');
+  server = http.createServer(app);
+}
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -93,7 +108,7 @@ function onListening() {
   debug('Listening on ' + bind);
 }
 
-console.log('listening...http://' + getLocalAddress().ipv4[0].address + ':' + port);
+console.log('listening...' + protocol + '://' + getLocalAddress().ipv4[0].address + ':' + port);
 
 function getLocalAddress() {
   var ifacesObj = {}

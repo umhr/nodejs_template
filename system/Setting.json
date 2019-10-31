@@ -1,5 +1,11 @@
 {
   "title": "nodejs_template",
+  "protocol": "http",
+  "pem": {
+    "privateKey": "",
+    "certificate": "",
+    "ca": ""
+  },
   "port": 3000,
   "pigs": {
     "boo": {
