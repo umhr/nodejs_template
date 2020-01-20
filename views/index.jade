@@ -103,3 +103,18 @@ block content
    a(href="netinfo", target="_blank") ネットワーク内のデバイスを取得
   li
    a(href="netinfo/refresh", target="_blank") netinfo/refresh
+
+  h2 QRCode
+  ul
+  li
+   a(href="qrcode/hoge.png?text=boofoowoo", target="_blank") qrcode/hoge.png?text=boofoowoo
+   span  qrcode/hoge.png に 該当ファイルが無い場合、boofoowoo のテキストを埋め込んだ qrコード を生成。二回目以降のアクセスでは、ファイルの取得として処理。
+  li
+   a(href="qrcode/remove/hoge.png", target="_blank") qrcode/remove/hoge.png
+   span  qrcode/hoge.png を削除
+  li
+   a(href="qrcode/remove/all", target="_blank") qrcode/remove/all
+   span  qrcode 内ファイル全削除
+  li
+   a(href="qrcode/remove/123000", target="_blank") qrcode/remove/123000
+   span  生成後 123000 ミリ秒以上経過のファイル削除
