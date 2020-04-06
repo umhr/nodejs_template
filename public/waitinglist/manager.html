@@ -1,0 +1,580 @@
+<html>
+
+<head>
+    <title>Manager</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <style type="text/css">
+        body {
+            background-color: #EEEEEE;
+            margin: 0px;
+        }
+
+        #head {
+            position: absolute;
+            /* background-color: azure; */
+            width: calc(100vw - 600px);
+            height: 50px;
+            align-items: center;
+            display: flex;
+        }
+
+        #content {
+            position: absolute;
+            top: 50px;
+            width: calc(100vw - 600px);
+            height: calc(100vh - 50px - 200px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #content-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #content-panel-prev button {
+            width: 200px;
+            height: 50px;
+            margin-bottom: 20px;
+            color: #111111;
+        }
+
+        #content-panel-current {
+            width: 650px;
+            height: 100px;
+            background-color: #F4859F;
+            font-weight: bold;
+            font-size: xx-large;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #content-panel-current button {
+            font-size: large;
+            margin-left: 20px;
+        }
+
+        #content-panel-next button {
+            width: 400px;
+            height: 80px;
+            margin-top: 20px;
+            background-color: #70B8D1;
+            font-size: x-large;
+        }
+
+        #content-wait {
+            font-size: x-large;
+            margin-top: 20px;
+        }
+
+        #content-wait>span {
+            display: inline-block;
+            margin: 0px 10px;
+            font-size: xx-large;
+        }
+
+        #list {
+            position: absolute;
+            background-color: #222222;
+            top: 0px;
+            right: 0px;
+            width: 600px;
+            height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        #list table {
+            width: 100%;
+        }
+
+        #list th {
+            background-color: #333333;
+            color: #EEEEEE;
+        }
+
+        #add {
+            position: absolute;
+            background-color: skyblue;
+            bottom: 0px;
+            right: 0px;
+            width: 600px;
+            height: calc(40px);
+            display: flex;
+            align-items: center;
+        }
+
+        .wait {
+            background-color: #70B8D1;
+        }
+
+        .current {
+            background-color: #F4859F;
+            font-weight: bold;
+        }
+
+        .called {
+            background-color: #FFDD8F;
+        }
+
+        .finished {
+            background-color: darkgray;
+            color: dimgray;
+        }
+
+        .finished input {
+            background-color: darkgray;
+            border: firebrick;
+            color: dimgray;
+        }
+
+        #called {
+            position: absolute;
+            background-color: #FFDD8F;
+            bottom: 0px;
+            width: calc(100vw - 600px);
+            height: 200px;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        #called-list span {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+            margin: 4px;
+            padding: 4px 8px;
+            color: black;
+        }
+
+        #called-list button {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="head">
+        <div style="margin-left: 20px;">
+            <span id="head-hour"></span><span id="head-colon">:</span><span id="head-minute"></span></div>
+    </div>
+    <div id="content">
+    </div>
+    <div id="called">
+        <div id="called-title">呼出済み（不在）</div>
+        <div id="called-list"></div>
+    </div>
+    <div id="list">
+        <table id="list-table">
+        </table>
+    </div>
+    <div id="add">
+        <input id="add-receptionNumber" type="number" style="width: 70px;">
+        <input id="add-name" type="text">
+        <button onclick="onAdd()">追加</button>
+    </div>
+    <script type="text/javascript">
+        var dateDistance = 0;
+        var data;
+        var intervalId = -1;
+        var timeCount = -1;
+        var currentId = -1;
+        var prevId = -1;
+        setInterval(updateTime, 1000);
+        onLoad();
+
+        function onLoad() {
+            var self = this;
+            $.ajax({
+                url: 'demo/data.json',
+                type: 'get',
+                dataType: 'json',
+                timeout: 3000,
+            }).done(function (data, textStatus, xhr) {
+                self.data = data;
+                setTime(xhr.getResponseHeader("date"));
+                //setData(data);
+                if (timeCount == -1 || self.data.data.list.length != data.data.list.length) {
+                    setData(data);
+                }
+                setClass(data);
+                setContentData(data);
+                console.dir(data);
+            }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log("error");
+            });
+        }
+
+        function setClass(data) {
+            var waitNum = 0;
+            var n = data.data.list.length;
+            for (var i = 0; i < n; i++) {
+                var item = data.data.list[i];
+                var status = item.status;
+                waitNum += status == 'wait' ? 1 : 0;
+                if (waitNum == 1) {
+                    $('#' + item.id).attr('class', 'current');
+                    waitNum++;
+                } else {
+                    $('#' + item.id).attr('class', status);
+                }
+            }
+        }
+
+        function setContentData(data) {
+            var indexes = {};
+            indexes.prev = -1;
+            indexes.current = -1;
+            indexes.next = -1;
+
+            var calledHtml = '';
+            var waitNum = 0;
+            var waitList = [];
+            var n = data.data.list.length;
+            for (var i = 0; i < n; i++) {
+                var item = data.data.list[i];
+                if (item.status == 'wait') {
+                    if (waitNum == 0) {
+                        indexes.prev = i - 1;
+                        indexes.current = i;
+                        indexes.next = i + 1 == n ? -1 : i + 1;
+                    }
+                    waitNum++;
+                    waitList.push(item);
+                } else if (item.status == 'called') {
+                    calledHtml += getCalledBtn(item.id);
+                }
+            }
+            $('#called-list').html(calledHtml);
+
+            currentId = -1;
+            prevId = -1;
+            var html = '<div id="content-panel">';
+            var item;
+            if (indexes.prev != -1) {
+                item = data.data.list[indexes.prev];
+                html += '<div id="content-panel-prev">';
+                html += '<button onclick="onPrevNext(-1)" class="' + item.status + '">';
+                html += '戻す　' + item.receptionNumber + ':' + item.name + ' さま</button>';
+                html += '</div>';
+                prevId = item.id;
+            }
+
+            if (indexes.current != -1) {
+                item = data.data.list[indexes.current];
+                html += '<div id="content-panel-current">';
+                html += '現在　' + item.receptionNumber + ":" + item.name;
+                html += '<span style="font-size:large;">さま</span>';
+                html += '<button class="called" onclick="onCurrent(\'called\')">呼出済み<br>(不在)</button>';
+                //html += '<button class="wait" onclick="onCurrent(\'finished\')">終了<br>(次へ)</button>';
+                html += '</div>';
+                currentId = item.id;
+            }
+
+            if (waitList.length > 1) {
+                item = waitList[1];
+                html += '<div id="content-panel-next"><button onclick="onPrevNext(1)">';
+                html += '次へ　' + item.receptionNumber + ':' + item.name + ' さま</button>';
+                html += '</div>';
+            }
+            html += '</div>';
+            html += '<div id="content-wait">現在<span>';
+            html += (waitList.length == 0 ? 0 : waitList.length - 1);
+            html += '</span>人待ち</div>';
+            $('#content').html(html);
+        }
+
+        function getCalledBtn(id) {
+            var item = getItem(id);
+            var html = '';
+            html += '<span id="called_' + item.id + '">';
+            html += item.receptionNumber + ':' + item.name;
+            html += '<button onclick="onCalledBtn(this,\'next\')">待ち先頭へ</button>';
+            html += '<button onclick="onCalledBtn(this,\'last\')">待ち最後へ</button>';
+            html += '</span>';
+            return html;
+        }
+
+        function onCalledBtn(self, str) {
+            var idStr = $(self).closest('span').attr('id');
+            var id = parseInt(idStr.substr(idStr.indexOf('_') + 1));
+
+            var item;
+            if (str == 'next') {
+                var nextIndex = -1;
+                var n = data.data.list.length;
+                for (var i = 0; i < n; i++) {
+                    var item = data.data.list[i];
+                    if (item.status == 'wait') {
+                        if (nextIndex == -1) {
+                            nextIndex = -2;
+                        } else {
+                            nextIndex = i;
+                            break;
+                        }
+                    }
+                }
+                item = getItem(id);
+                item.status = 'wait';
+                data.data.list.splice(nextIndex, 0, item);
+                data.data.list.splice(getIndexById(id), 1);
+            } else if (str == 'last') {
+                item = getItem(id);
+                item.status = 'wait';
+                data.data.list.push(item);
+                data.data.list.splice(getIndexById(id), 1);
+            }
+            saveData();
+        }
+
+        function onCurrent(status) {
+            var item = getItem(currentId);
+            item.status = status;
+            saveItem(currentId, item);
+        }
+
+        function setData(data) {
+            var html = '';
+            html += '<tr><th>受付番号</th><th>お名前</th><th>受付時刻</th><th>ステイタス</th><th>上下</th></tr>';
+            var n = data.data.list.length;
+            var receptionNumberMax = -1;
+            for (var i = 0; i < n; i++) {
+                var item = data.data.list[i];
+                html += '<tr id="' + item.id + '">';
+                html += '<td class="receptionNumber">' + item.receptionNumber + '</td>';
+                html += '<td><input class="name" type="text" name="name" value="' + item.name + '" ';
+                html += 'onblur="onSetItem(this)" onfocus="onFocus(this)"></td>';
+                html += '<td class="time">' + new Date(item.time).toLocaleTimeString() + '</td>';
+                html += '<td>' + getStatusHtml(item.id, item.status) + '</td>';
+                html +=
+                    '<td><button onclick="onUpDown(this,-1)">↑</button><button onclick="onUpDown(this,1)">↓</button></td>';
+                html += '</tr>';
+                receptionNumberMax = Math.max(receptionNumberMax, parseInt(item.receptionNumber));
+            }
+            html += '';
+            $('#list-table').html(html);
+            $('#add-receptionNumber').val(receptionNumberMax + 1);
+        }
+
+        function getStatusHtml(id, status) {
+            var result = '';
+            result += '';
+            var name = 'list-table-status_' + id;
+            var value = 'wait';
+            var checked = value == status ? 'checked' : '';
+            result += '<label><input type="radio" name="' + name + '" value="' + value + '" ';
+            result += checked + ' onchange="onSetItem(this)">待ち</label>';
+            value = 'called';
+            checked = value == status ? 'checked' : '';
+            result += '<label><input type="radio" name="' + name + '" value="' + value + '" ';
+            result += checked + ' onchange="onSetItem(this)">呼出済み</label>';
+            value = 'finished';
+            checked = value == status ? 'checked' : '';
+            result += '<label><input type="radio" name="' + name + '" value="' + value + '" ';
+            result += checked + ' onchange="onSetItem(this)">終了</label>';
+            return result;
+        }
+
+        function onAdd() {
+            var receptionNumber = $('#add-receptionNumber').val();
+            var name = $('#add-name').val();
+            var item = {};
+            if (receptionNumber != '') {
+                item.receptionNumber = receptionNumber;
+            }
+            if (name != '') {
+                item.name = name;
+            }
+            var obj = {
+                item: JSON.stringify(item)
+            };
+            $.ajax({
+                url: 'demo',
+                type: 'post',
+                data: obj,
+                dataType: 'json',
+                timeout: 3000,
+            }).done(function (data, textStatus, xhr) {
+                setTime(xhr.getResponseHeader("date"));
+                console.dir(data);
+                onLoad();
+                $('#add-receptionNumber').val('');
+                $('#add-name').val('')
+            }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log("error");
+            });
+        }
+
+        function onPrevNext(num) {
+            var id;
+            var item;
+            if (num == -1) {
+                id = prevId;
+                item = getItem(prevId);
+                item.status = 'wait';
+            } else if (num == 1) {
+                id = currentId;
+                item = getItem(currentId);
+                item.status = 'finished';
+            }
+            saveItem(id, item);
+        }
+
+        function onUpDown(self, num) {
+            var id = $(self).closest('tr').attr('id');
+            var n = data.data.list.length;
+            for (var i = 0; i < n; i++) {
+                if (data.data.list[i].id == id) {
+                    var currentItem = data.data.list[i];
+                    if (num == 1 && i + 1 < n) {
+                        data.data.list[i] = data.data.list[i + 1];
+                        data.data.list[i + 1] = currentItem;
+                    } else if (num == -1 && 0 < i) {
+                        data.data.list[i] = data.data.list[i - 1];
+                        data.data.list[i - 1] = currentItem;
+                    }
+                    break;
+                }
+            }
+            saveData();
+        }
+
+        function saveData() {
+            var obj = {
+                data: JSON.stringify(data.data)
+            };
+
+            $.ajax({
+                url: 'demo',
+                type: 'put',
+                data: obj,
+                dataType: 'json',
+                timeout: 3000,
+            }).done(function (data, textStatus, xhr) {
+                setTime(xhr.getResponseHeader("date"));
+                console.dir(data);
+                onLoad();
+            }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log("error");
+            });
+        }
+
+        function onSetItem(self) {
+            var id = $(self).closest('tr').attr('id');
+            setItem(id);
+            if (intervalId > -1) {
+                clearInterval(intervalId);
+            }
+        }
+
+        function onFocus(self) {
+            var id = $(self).closest('tr').attr('id');
+            console.log('onFocus', id);
+            //setTimeout(setItem, 5000, id);
+            timeCount = 0;
+            intervalId = setInterval(setItem2, 1000, id);
+        }
+
+        function setItem2(id) {
+            var name = $('#' + id).find('.name').val();
+            if (getItem(id).name == name) {
+                timeCount = -1;
+            } else if (timeCount < 10) {
+                timeCount++;
+            } else {
+                //timeCount = -1;
+                setItem(id);
+            }
+            console.log(id, name, timeCount);
+            //setItem(id);
+        }
+
+        function setItem(id) {
+            var status = $('input[name="' + 'list-table-status_' + id + '"]:checked').val();
+            var name = $('#' + id).find('.name').val();
+            //console.log(id, name, status);
+            var item = getItem(id);
+            var isChange = false;
+            if (item.name != name) {
+                item.name = name;
+                isChange = true;
+            }
+            if (item.status != status) {
+                item.status = status;
+                isChange = true;
+            }
+            if (!isChange) {
+                console.log('違いが無いので、送信しない。');
+                return;
+            }
+            console.dir(item);
+            saveItem(id, item);
+        }
+
+
+        function saveItem(id, item) {
+            var obj = {
+                item: JSON.stringify(item)
+            };
+
+            $.ajax({
+                url: 'demo/' + id,
+                type: 'put',
+                data: obj,
+                dataType: 'json',
+                timeout: 3000,
+            }).done(function (data, textStatus, xhr) {
+                setTime(xhr.getResponseHeader("date"));
+                console.dir(data);
+                onLoad();
+            }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log("error");
+            });
+        }
+
+
+        function setTime(date) {
+            console.log(date, (new Date(date)).getTime());
+            dateDistance = Date.now() - (new Date(date)).getTime();
+        }
+
+        function getItem(id) {
+            var n = data.data.list.length;
+            for (var i = 0; i < n; i++) {
+                var item = data.data.list[i];
+                if (item.id == id) {
+                    return item;
+                }
+            }
+            return undefined;
+        }
+
+        function getIndexById(id) {
+            var n = data.data.list.length;
+            for (var i = 0; i < n; i++) {
+                var item = data.data.list[i];
+                if (item.id == id) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        function updateTime() {
+            var date = new Date();
+            date.setMilliseconds(date.getMilliseconds() + dateDistance);
+            $('#head-hour').text(date.getHours());
+            $('#head-minute').text((date.getMinutes() + 100).toString().substr(1));
+            if (date.getSeconds() % 2 == 0) {
+                $('#head-colon').css("visibility", "visible");
+            } else {
+                $('#head-colon').css("visibility", "hidden");
+            }
+        }
+    </script>
+</body>
+
+</html>

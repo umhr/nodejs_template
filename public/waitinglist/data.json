@@ -1,0 +1,84 @@
+{
+    "data": {
+        "list": [{
+                "receptionNumber": 1,
+                "name": "田中",
+                "time": 1593701999999,
+                "status": "finished"
+            }, {
+                "receptionNumber": 2,
+                "name": "市原",
+                "time": 1593701999999,
+                "status": "finished"
+            }, {
+                "receptionNumber": 3,
+                "name": "佐藤",
+                "time": 1593701999999,
+                "status": "called"
+            }, {
+                "receptionNumber": 4,
+                "name": "斎藤",
+                "time": 1593701999999,
+                "status": "finished"
+            }, {
+                "receptionNumber": 5,
+                "name": "高橋",
+                "time": 1593701999999,
+                "status": "finished"
+            }, {
+                "receptionNumber": 6,
+                "name": "小山",
+                "time": 1593701999999,
+                "status": "called"
+            }, {
+                "receptionNumber": 7,
+                "name": "小川",
+                "time": 1593701999999,
+                "status": "called"
+            }, {
+                "receptionNumber": 10,
+                "name": "山崎",
+                "time": 1593701999999,
+                "status": "finished"
+            }, {
+                "receptionNumber": 13,
+                "name": "村川",
+                "time": 1593701999999,
+                "status": "finished"
+            }, {
+                "receptionNumber": 14,
+                "name": "渡辺",
+                "time": 1593701999999,
+                "status": "called"
+            }, {
+                "receptionNumber": 15,
+                "name": "山田",
+                "time": 1593701999999,
+                "status": "finished"
+            }, {
+                "receptionNumber": 16,
+                "name": "田中",
+                "time": 1593701999999,
+                "status": "wait"
+            },
+            {
+                "receptionNumber": 17,
+                "name": "鈴木",
+                "time": 1593701999999,
+                "status": "wait"
+            },
+            {
+                "receptionNumber": 18,
+                "name": "新井",
+                "time": 1593701999999,
+                "status": "wait"
+            },
+            {
+                "receptionNumber": 19,
+                "name": "木村",
+                "time": 1593701999999,
+                "status": "wait"
+            }
+        ]
+    }
+}

@@ -1,0 +1,128 @@
+<html>
+
+<head>
+    <title>Client</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <style type="text/css">
+        body {
+            background-color: #EEEEEE;
+        }
+
+        #order>table {
+            background-color: #70B8D1;
+            border-radius: 4px;
+            border-collapse: separate;
+            width: 100%;
+        }
+
+        #order>table th {
+            background-color: #FFDD8F;
+            border-radius: 2px;
+            padding: 5px 20px;
+        }
+
+        #order>table td {
+            text-align: center;
+            background-color: cornsilk;
+            border-radius: 2px;
+            padding: 5px 20px;
+        }
+
+        #order>table tr:nth-child(2n) td {
+            background-color: aliceblue;
+        }
+    </style>
+</head>
+
+<body>
+    <div>■順番</div>
+    <div id='time'></div>
+    <div id='wait'></div>
+    <div id="order">
+        <table id="order-table">
+            <tr>
+                <th>あと</th>
+                <th>受付番号</th>
+            </tr>
+            <tr>
+                <td><span class="num">1</span><span class="hito">人</span></td>
+                <td>17</td>
+            </tr>
+            <tr>
+                <td><span class="num">2</span><span class="hito">人</span></td>
+                <td>18</td>
+            </tr>
+        </table>
+    </div>
+    <script type="text/javascript">
+        //var speech = new Speech();
+        onLoad();
+
+        function onLoad() {
+            $.ajax({
+                url: 'demo/data.json',
+                type: 'get',
+                dataType: 'json',
+                timeout: 3000,
+            }).done(function (data, textStatus, xhr) {
+                setData(data);
+                setTime(xhr.getResponseHeader("date"));
+                console.dir(data);
+            }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log("error");
+            });
+        }
+
+        function setTime(date) {
+            var d = new Date(date);
+            var str = '';
+            str += (d.getMonth() + 101).toString().substr(1) + '月';
+            str += (d.getDate() + 100).toString().substr(1) + '日';
+            str += (d.getHours() + 100).toString().substr(1) + '時';
+            str += (d.getMinutes() + 100).toString().substr(1) + '分現在';
+            console.log(str);
+            $('#time').text(str);
+        }
+
+        function setData(data) {
+            var props = setList(data.data);
+            $('#old-list').text(props.calledList.join(','));
+            var html = '';
+            html += '<tr><th>受付番号</th><th>あと</th></tr>';
+            var n = props.waitList.length;
+            for (var i = 0; i < n; i++) {
+                html += '<tr>';
+                html += '<td>' + props.waitList[i] + '</td>';
+                html += '<td><span class="num">' + (i + 1) + '</span><span class="hito">人</span></td>';
+                html += '</tr>';
+            }
+            $('#order-table').html(html);
+            var receptionNumber = props.receptionNumber == -1 ? '---' : props.receptionNumber;
+            $('#content-num').text(receptionNumber);
+            $('#content-wait-num').text(props.waitList.length);
+            $('#wait').text(n + '人待ち');
+        }
+
+        function setList(data) {
+            var result = {};
+            result.calledList = [];
+            result.waitList = [];
+            result.receptionNumber = -1;
+            var n = data.list.length;
+            for (var i = 0; i < n; i++) {
+                if (data.list[i].status == 'called') {
+                    result.calledList.push(data.list[i].receptionNumber);
+                } else if (data.list[i].status == 'wait') {
+                    if (result.receptionNumber == -1) {
+                        result.receptionNumber = data.list[i].receptionNumber;
+                    } else {
+                        result.waitList.push(data.list[i].receptionNumber);
+                    }
+                }
+            }
+            return result;
+        }
+    </script>
+</body>
+
+</html>

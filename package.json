@@ -8,17 +8,17 @@
     "stop": "forever stop 0"
   },
   "dependencies": {
-    "cookie-parser": "~1.4.3",
-    "csv": "^5.3.1",
-    "debug": "~2.6.9",
-    "express": "~4.16.0",
-    "http-errors": "~1.6.2",
-    "iconv-lite": "^0.4.24",
+    "cookie-parser": "^1.4.5",
+    "csv": "^5.3.2",
+    "debug": "~4.1.1",
+    "express": "~4.17.1",
+    "http-errors": "~1.7.3",
+    "iconv-lite": "^0.5.1",
     "jade": "~1.11.0",
-    "morgan": "~1.9.0",
+    "morgan": "~1.10.0",
     "multer": "^1.4.2",
     "qrcode": "^1.4.4",
-    "sharp": "^0.22.1",
+    "sharp": "^0.25.2",
     "socket.io": "^2.3.0",
     "sqlite3": "^4.1.1"
   }

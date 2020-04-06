@@ -1,0 +1,284 @@
+<html>
+
+<head>
+    <title>Stand</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <style type="text/css">
+        /*
+    https://www.ricoh.co.jp/solutions/industry/medical/clinic-design/
+    http://www.k-practie.co.jp/medio_light.html
+    https://sv01.e-junban.com/asazibi/asazibi1/
+
+    Web Speech Synthesis API（音声合成API）で遊んでみた
+    https://qiita.com/kyota/items/da530ad22733b644518a
+    */
+        body {
+            background-color: #EEEEEE;
+            margin: 0px;
+        }
+
+        #colon {
+            display: inline-block;
+            text-align: center;
+            width: 3vh;
+        }
+
+        #content {
+            position: absolute;
+            width: 80vw;
+            height: 85vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #000000;
+            flex-direction: column;
+        }
+
+        #content-time {
+            position: absolute;
+            top: 2vh;
+            left: 2vw;
+            font-size: 7vh;
+        }
+
+        #content-title {
+            font-size: 8vh;
+            border-bottom: medium solid #333333;
+        }
+
+        #content-numtitle {
+            margin-top: 7vh;
+            font-size: 4vh;
+        }
+
+        #content-num {
+            text-align: center;
+            background-color: #F4859F;
+            padding: 1vh 6vw 0vh 6vw;
+            font-size: 20vh;
+        }
+
+        #content-wait {
+            margin-top: 3vh;
+            font-size: 5vh;
+        }
+
+        #content-wait-num {
+            margin: 0px 0.5vw;
+        }
+
+        #content-wait span {
+            font-size: 10vh;
+        }
+
+        #order {
+            position: absolute;
+            right: 0px;
+            width: 20vw;
+            height: 100vh;
+            background-color: #70B8D1;
+        }
+
+        #order>table {
+            /*background-color: #70B8D1;*/
+            width: calc(100% - 1vw);
+            height: calc(100% - 1vh);
+            margin-left: 0.5vw;
+            margin-top: 0.5vh;
+            border-radius: 4px;
+            border-collapse: separate;
+        }
+
+        #order>table th {
+            height: 5vh;
+            background-color: #FFDD8F;
+            font-size: 2.5vh;
+            border-radius: 2px;
+        }
+
+        #order>table td {
+            text-align: center;
+            background-color: cornsilk;
+            font-size: 5vh;
+            border-radius: 2px;
+        }
+
+        #order>table tr:nth-child(2n) td {
+            background-color: aliceblue;
+        }
+
+        #order>table .num {
+            font-size: 4vh;
+        }
+
+        #order>table .hito {
+            font-size: 3vh;
+        }
+
+        #called {
+            position: absolute;
+            left: 0px;
+            bottom: 0px;
+            width: 80vw;
+            height: 15vh;
+            background-color: #FFDD8F;
+
+            /*background-color: #70B8D1;*/
+        }
+
+        #called-title {
+            margin: 0.5vh 0vw -0.5vh 1.5vw;
+            font-size: 3vh;
+
+        }
+
+        #called-list {
+            background-color: rgba(255, 255, 255, 0.5);
+            font-size: 6vh;
+            margin: 0vh 1vw 0vh 1vw;
+            padding: 0.5vh 2vw 0vh 2vw;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="content">
+        <div id="content-time"><span id="hour">12</span><span id="colon">:</span><span id="minute">35</span></div>
+        <div id="content-title">順 番 の ご 案 内</div>
+        <div id="content-numtitle">呼出番号</div>
+        <div id="content-num">16</div>
+        <div id="content-wait">現在<span id="content-wait-num">23</span>人待ち</div>
+    </div>
+    <div id="order">
+        <table id="order-table">
+            <tr>
+                <th>あと</th>
+                <th>受付番号</th>
+            </tr>
+            <tr>
+                <td><span class="num">1</span><span class="hito">人</span></td>
+                <td>17</td>
+            </tr>
+            <tr>
+                <td><span class="num">2</span><span class="hito">人</span></td>
+                <td>18</td>
+            </tr>
+        </table>
+    </div>
+    <div id="called">
+        <div id="called-title">呼出済み（受付にお申し出ください）</div>
+        <div id="called-list">3,6,7,14</div>
+    </div>
+    <script type="text/javascript">
+        onLoad();
+        var dateDistance = 0;
+        setInterval(updateTime, 1000);
+        setInterval(onLoad, 5000);
+        var etag = '';
+
+        function onLoad() {
+            $.ajax({
+                url: 'demo/data.json',
+                type: 'get',
+                dataType: 'json',
+                timeout: 3000,
+            }).done(function (data, textStatus, xhr) {
+                //console.log(xhr);
+                if (etag == xhr.getResponseHeader("etag")) {
+                    return;
+                }
+                etag = xhr.getResponseHeader("etag");
+
+                setTime(xhr.getResponseHeader("date"));
+                setData(data);
+                console.dir(data);
+            }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log("error");
+            });
+        }
+
+        function setData(data) {
+            var props = setList(data.data);
+
+            if (props.calledList.length == 0) {
+                $('#called-list').html('&nbsp;');
+            } else {
+                var str = props.calledList.join(',');
+                if ($('#called-list').text() != str) {
+                    $('#called-list').text(str);
+                    $('#called-list').hide().fadeIn('slow');
+                }
+            }
+
+            var maxNum = 8;
+            var html = '';
+            html += '<tr><th>受付番号</th><th>あと</th></tr>';
+            var n = Math.min(props.waitList.length, maxNum);
+            for (var i = 0; i < n; i++) {
+                html += '<tr>';
+                html += '<td>' + props.waitList[i] + '</td>';
+                html += '<td><span class="num">' + (i + 1) + '</span><span class="hito">人</span></td>';
+                html += '</tr>';
+            }
+            if (n < maxNum) {
+                for (var i = 0; i < maxNum - n; i++) {
+                    html += '<tr>';
+                    html += '<td>&nbsp;</td>';
+                    html += '<td></td>';
+                    html += '</tr>';
+                }
+            }
+            $('#order-table').html(html);
+            var receptionNumber = props.receptionNumber == -1 ? '---' : props.receptionNumber;
+            if ($('#content-num').text() != receptionNumber) {
+                $('#content-num').text(receptionNumber);
+                $('#content-num').hide().fadeIn('slow');
+            }
+            if ($('#content-wait-num').text() != props.waitList.length) {
+                $('#content-wait-num').text(props.waitList.length);
+                $('#content-wait-num').hide().fadeIn('slow');
+            }
+        }
+
+        function setList(data) {
+            var result = {};
+            result.calledList = [];
+            result.waitList = [];
+            result.receptionNumber = -1;
+            var n = data.list.length;
+            for (var i = 0; i < n; i++) {
+                if (data.list[i].status == 'called') {
+                    result.calledList.push(data.list[i].receptionNumber);
+                } else if (data.list[i].status == 'wait') {
+                    if (result.receptionNumber == -1) {
+                        result.receptionNumber = data.list[i].receptionNumber;
+                    } else {
+                        result.waitList.push(data.list[i].receptionNumber);
+                    }
+                }
+            }
+            return result;
+        }
+
+        function setTime(date) {
+            console.log(date, (new Date(date)).getTime());
+            dateDistance = Date.now() - (new Date(date)).getTime();
+        }
+
+        function updateTime() {
+            var date = new Date();
+            date.setMilliseconds(date.getMilliseconds() + dateDistance);
+            $('#hour').text(date.getHours());
+            $('#minute').text((date.getMinutes() + 100).toString().substr(1));
+            if (date.getSeconds() % 2 == 0) {
+                $('#colon').css("visibility", "visible");
+            } else {
+                $('#colon').css("visibility", "hidden");
+            }
+        }
+    </script>
+</body>
+
+</html>
