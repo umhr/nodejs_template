@@ -274,12 +274,17 @@
                 currentId = item.id;
             }
 
-            if (waitList.length > 1) {
-                item = waitList[1];
+            if (waitList.length > 0) {
                 html += '<div id="content-panel-next"><button onclick="onPrevNext(1)">';
-                html += '次へ　' + item.receptionNumber + ':' + item.name + ' さま</button>';
-                html += '</div>';
+                if (waitList.length > 1) {
+                    item = waitList[1];
+                    html += '次へ　' + item.receptionNumber + ':' + item.name + ' さま';
+                } else {
+                    html += '終了';
+                }
+                html += '</button></div>';
             }
+
             html += '</div>';
             html += '<div id="content-wait">現在<span>';
             html += (waitList.length == 0 ? 0 : waitList.length - 1);
