@@ -6,7 +6,10 @@ exports.getInstance = function () {
   return new ThumbManager();
 };
 
-var ThumbManager = function () {}
+var ThumbManager = function () {
+  var setting = require('../../system/Setting.js').getInstance();
+  this.ffmpeg = setting.get('ffmpeg');
+}
 
 // http://127.0.0.1:3000/upload?fit=contain&width=100&height=100
 ThumbManager.prototype.image = async function (file, query) {
@@ -44,7 +47,6 @@ ThumbManager.prototype.video = function (file, query) {
   var w = parseInt(query.width) || -1;
   var h = parseInt(query.height) || -1;
 
-  var AppPath = 'D:\\inetpub\\ffmpeg-20180820-78d4b6b-win64-static\\bin\\ffmpeg.exe';
   var scale;
   if (fit == 'cover') {
     scale = ' -vf "scale=' + w + ':' + h + ':force_original_aspect_ratio=increase,crop=' + w + ':' + h + '"';
@@ -60,7 +62,7 @@ ThumbManager.prototype.video = function (file, query) {
   var out = path + '.jpg';
   var source = ' "' + path + '"';
   var argument = ' -i' + source + scale + ' -f image2 -vframes 1 -ss 3 -an -deinterlace "' + out + '"';
-  var cmd = AppPath + ' ' + argument;
+  var cmd = this.ffmpeg + ' ' + argument;
   return new Promise((resolve, reject) => {
     require('child_process').exec(cmd, (err, stdout, stderr) => {
       console.log('err:', err);
