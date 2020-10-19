@@ -18,6 +18,7 @@ var access = require('./routes/access/access');
 var viewer = require('./routes/viewer/viewer');
 var chat = require('./routes/chat/chat');
 var qrcode = require('./routes/qrcode/qrcode');
+var remote = require('./routes/remote/remote');
 var waitinglist = require('./routes/waitinglist/waitinglist');
 
 var app = express();
@@ -49,6 +50,7 @@ app.use('/viewer', viewer);
 app.use('/chat', chat);
 app.use('/qrcode', qrcode);
 app.use('/waitinglist', waitinglist);
+app.use('/remote', remote);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

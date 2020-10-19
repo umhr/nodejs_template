@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>remote</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <style type="text/css">
+        body {
+            background-color: #666666;
+            margin: 0;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex1 {
+            flex: 1;
+        }
+
+        #head {
+            background-color: #111111;
+            padding: 5px;
+            color: #ffffff;
+        }
+
+        #head>div:last-child {
+            margin-left: auto;
+        }
+
+        #main img {
+            max-width: 70vw;
+            max-height: 70vh;
+        }
+
+        #ocr img {}
+
+        #ocr-img-num input {
+            width: 50px;
+        }
+
+        #mouse-x,
+        #mouse-y,
+        #main-reload-sec {
+            width: 50px;
+        }
+
+        #ocrtext {
+            background-color: beige;
+            padding: 10px;
+        }
+
+        pre {
+            white-space: pre-wrap;
+        }
+
+        img {
+            vertical-align: top;
+        }
+
+        .card {
+            background-color: #dddddd;
+            margin: 5px;
+            padding: 2px;
+            border-radius: 3px;
+        }
+
+        .card>div:nth-child(1) {
+            background-color: #333333;
+            color: #ffffff;
+            padding: 0px 5px;
+            border-radius: 2px;
+        }
+
+        .card>div {
+            background-color: #CCCCCC;
+            padding: 5px;
+        }
+
+        .nowrap {
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="content">
+        <div id="head" class="flex">
+            <div><button onclick="onLoad()">Reload</button></div>
+            <div><input type="checkbox" id="main-reload" checked="checked">Auto</div>
+            <div><input type="number" id="main-reload-sec" maxlength="4" value="10" min="3">sec</div>
+            <div><a href="./data/list" target="_blank">log</a><button onclick="onLogCleanup()">CleanUp</button></div>
+        </div>
+        <div id="main" class="card">
+            <div>Main</div>
+            <div class="flex">
+                <div class="flex1"><input type="checkbox" id="main-desktop" checked="checked">desktop</div>
+                <div id="mainview"></div>
+                <div class="flex1"></div>
+            </div>
+        </div>
+        <div class="flex">
+            <div>
+                <div class="card">
+                    <div>Keyboard</div>
+                    <div>
+                        <div>
+                            <select id="keyboardSelect" onchange="onKeyboardSelect(this)">
+                                <option value="z1">サンプル１</option>
+                                <option value="z2">サンプル２</option>
+                                <option value="z3">サンプル３</option>
+                            </select>
+                        </div>
+                        <div class="flex">
+                            <input type="text" id="key-text"><button onclick="onKey()" class="nowrap">送信</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div>Mouse</div>
+                    <div>
+                        <div class="flex">
+                            <div class="nowrap">x:<input type="number" id="mouse-x" maxlength="4" value="50"></div>
+                            <div class="nowrap">y:<input type="number" id="mouse-y" maxlength="4" value="50"></div>
+                        </div>
+                        <div class="flex">
+                            <input value="left" type="radio" name="mouseevent" checked="checked">左
+                            <input value="center" type="radio" name="mouseevent">中央
+                            <input value="right" type="radio" name="mouseevent">右
+                        </div>
+                        <div class="flex">
+                            <div><button onclick="onMouse('click')">Click</button></div>
+                            <div><button onclick="onMouse('down')">Down</button></div>
+                            <div><button onclick="onMouse('up')">Up</button></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div id="ocr" class="card">
+                <div>OCR</div>
+                <div class="flex">
+                    <input type="checkbox" id="ocr-img" checked="checked">画像取得
+                    <div id="ocr-img-num" class="flex">
+                        <div>x:<input type="number" id="ocr-img-x" maxlength="4" value="50"></div>
+                        <div>y:<input type="number" id="ocr-img-y" maxlength="4" value="50"></div>
+                        <div>w:<input type="number" id="ocr-img-w" maxlength="4" value="300"></div>
+                        <div>h:<input type="number" id="ocr-img-h" maxlength="4" value="150"></div>
+                    </div>
+                    <input type="checkbox" id="ocr-text" checked="checked">OCR有効
+                </div>
+                <div class="flex">
+                    <div id="ocrview"></div>
+                    <div id="ocrtext"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="display:none;">
+        <pre id="log"></pre>
+    </div>
+
+    <script type="text/javascript">
+        setKeyboardSelect();
+        getPrintscreen();
+
+        var count = 1;
+        setInterval(() => {
+            if ($('#main-reload').prop("checked")) {
+                var sec = parseInt($('#main-reload-sec').val());
+                if (count % sec == 0) {
+                    getPrintscreen();
+                }
+            }
+            count++;
+        }, 1000);
+
+        function setKeyboardSelect() {
+            // https://docs.microsoft.com/ja-jp/previous-versions/windows/scripting/cc364423(v=msdn.10)?redirectedfrom=MSDN
+            var html = '';
+            var list = [{ BACKSPACE: '{BS}' }, { BREAK: '{BREAK}' }, { 'CAPS LOCK': '{CAPSLOCK}' }];
+            list.push({ DELETE: '{DEL}' }, { 'DOWN ARROW': '{DOWN}' }, { END: '{END}' }, { ENTER: '~' });
+            list.push({ ESC: '{ESC}' }, { HELP: '{HELP}' }, { HOME: '{HOME}' }, { INSERT: '{INS}' }, { 'LEFT ARROW': '{LEFT}' });
+            list.push({ 'NUM LOCK': '{NUMLOCK}' }, { 'PAGE DOWN': '{PGDN}' }, { 'PAGE UP': '{PGUP}' }, { 'PRINT SCREEN': '{PRTSC}' });
+            list.push({ 'RIGHT ARROW': '{RIGHT}' }, { 'SCROLL LOCK': '{SCROLLLOCK}' }, { 'TAB': '{TAB}' }, { 'UP ARROW': '{UP}' });
+            list.push({ F1: '{F1}' }, { F2: '{F2}' }, { F3: '{F3}' }, { F4: '{F4}' }, { F5: '{F5}' }, { F6: '{F6}' });
+            list.push({ F7: '{F7}' }, { F8: '{F8}' }, { F9: '{F9}' }, { F10: '{F10}' }, { F11: '{F11}' }, { F12: '{F12}' });
+            list.push({ F13: '{F13}' }, { F14: '{F14}' }, { F15: '{F15}' }, { F16: '{F16}' });
+            list.push({ SHIFT: '+' }, { CTRL: '^' }, { ALT: '%' });
+            list.push({ '{': '{{}}' }, { '}': '{}}' }, { '[': '{[}' }, { ']': '{]}' });
+            list.forEach((obj) => {
+                var keys = Object.keys(obj);
+                html += '<option value="' + obj[keys[0]] + '">' + keys[0] + '</option>';
+            });
+            $('#keyboardSelect').html(html);
+        }
+
+        function onLogCleanup() {
+            var isDelete = confirm('サーバー上のログファイルを削除します。');
+            if (!isDelete) {
+                return;
+            }
+            var url = './data/cleanup';
+            ajax(url);
+        }
+
+        function onKeyboardSelect(self) {
+            var val = $('#key-text').val();
+            val += $(self).val();
+            $('#key-text').val(val);
+        }
+
+        function onMouse(type) {
+            var at = '';
+            if (!$('#main-desktop').prop("checked")) {
+                at = 'a';
+            }
+            var x = at + $('#mouse-x').val();
+            var y = at + $('#mouse-y').val();
+            var pos = $('input[name=mouseevent]:checked').val();
+            var str = pos + ',' + type + ',' + x + ',' + y;
+            setKey('mouse', str);
+            //console.log(pos, type, x, y);
+        }
+        function onKey() {
+            var str = $('#key-text').val();
+            setKey('key', str);
+        }
+        function onLoad() {
+            getPrintscreen();
+        }
+
+        function onMainimgClick() {
+            var at = '';
+            if (!$('#main-desktop').prop("checked")) {
+                at = 'a';
+            }
+            var x = event.offsetX * $('#mainimg').get(0).naturalWidth / $('#mainimg').get(0).width;
+            var y = event.offsetY * $('#mainimg').get(0).naturalHeight / $('#mainimg').get(0).height;
+            console.log('onMainimgClick', Math.round(x), Math.round(y));
+            var str = 'left,click,' + at + Math.round(x) + ',' + at + Math.round(y);
+            $('#mouse-x').val(Math.round(x));
+            $('#mouse-y').val(Math.round(y));
+            setKey('mouse', str);
+        }
+
+        function setScreen(data) {
+            var html = "";
+            html += "<img id='mainimg' onclick='onMainimgClick()' src='" + data.echo.stdoutlist[0] + "' >";
+            $('#mainview').html(html);
+            if (data.echo.stdoutlist[1] != undefined && data.echo.stdoutlist[1].indexOf('.txt') == -1) {
+                html = "<img src='" + data.echo.stdoutlist[1] + "' >";
+                $('#ocrview').html(html);
+            }
+            if (data.echo.stdoutlist[2] != undefined) {
+                getOCRTEXT(data.echo.stdoutlist[2]);
+            }
+            var log = JSON.stringify(data);
+            $('#log').text(log);
+        }
+
+        function getPrintscreen() {
+            var target = $('#main-desktop').prop("checked") ? 'desktop' : 'active';
+            var ocr = $('#ocr-img').prop("checked") ? '_png' : '';
+            if (ocr.length > 1) {
+                ocr += $('#ocr-text').prop("checked") ? 'ocr' : '';
+                ocr += '.' + $('#ocr-img-x').val();
+                ocr += '.' + $('#ocr-img-y').val();
+                ocr += '.' + $('#ocr-img-w').val();
+                ocr += '.' + $('#ocr-img-h').val();
+            }
+            var url = './process/printscreen.ps1/' + target + ',jpg' + ocr;
+            //console.log(url);
+            ajax(url, (data) => { setScreen(data); });
+            //var url = './process/printscreen.ps1/desktop,jpg_pngocr.300.50.300.100';
+        }
+
+        function getOCRTEXT(url) {
+            $.ajax({
+                url: url,
+                type: 'get',
+                dataType: 'text',
+                timeout: 10000,
+            }).done(function (data) {
+                $('#ocrtext').text(data);
+            }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log("error");
+            });
+        }
+
+        function setKey(type, str) {
+            var url = './process/';
+            if (type == 'key') {
+                url += 'key.ps1/' + str;
+            } else if (type == 'mouse') {
+                url += 'mouse.ps1/' + str;
+            }
+            console.log(url);
+            ajax(url);
+        }
+
+        function ajax(url, func) {
+            console.log(url);
+            $.ajax({
+                url: url,
+                type: 'get',
+                dataType: 'json',
+                timeout: 10000,
+            }).done((data) => {
+                console.dir(data);
+                if (func) {
+                    func(data);
+                }
+            }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log("error");
+            });
+        }
+    </script>
+</body>
+
+</html>
