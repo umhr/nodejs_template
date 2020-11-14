@@ -135,6 +135,7 @@
             result += '<input name="item0" onchange="onItemTxt(this)" onkeyup="onItemTxt(this)" value="' + value + '" name="name" size="30" maxlength="20" type="text">';
 
             result += '<div id="item0images">';
+
             result += '<div id="item0_img0src" class="imgview">';
             result += '<div class="imgview-name">' + _data.data.item0.img0src + '</div>';
             result += '<img class="imgview-img" src="' + _data.data.item0.img0src + '">';
@@ -157,6 +158,8 @@
             result += '<div><button onclick="onDelete(this)">Delete</button></div>';
             result += '<div><input onchange="onItemImg(this)" accept="image/jpeg, image/png" type="file"></div>';
             result += '<div class="imgview-preview"></div>';
+            result += '</div>';
+
             result += '</div>';
             return result;
         }
