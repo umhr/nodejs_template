@@ -38,10 +38,9 @@
         function done(data) {
             var html = '';
             html += '<h3>everyday</h3>';
-            var keys = Object.keys(data.data.everyday);
-            var n = keys.length;
+            var n = data.data.everyday.length;
             for (var i = 0; i < n; i++) {
-                html += getItem(i, parseInt(keys[i]), data.data.everyday[keys[i]]);
+                html += getItem(i, data.data.everyday[i]);
             }
             html += '<div class="item">';
             html += '<input class="enable" type="checkbox">';
@@ -51,19 +50,20 @@
             html += '</div>';
 
             html += '<button onclick="onSave()" type="button">save</button>';
+            html += '<div>＊時:分を削除し、「--:--」にしてsaveボタン押下で欄削除。</div>';
             html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
             $('#content').html(html);
         }
 
-        function getItem(index, key, itemData) {
+        function getItem(index, itemData) {
             var html = '';
             html += '<div class="item">';
             var checked = itemData.enable ? ' checked="checked"' : '';
             html += '<input class="enable" type="checkbox"' + checked + '>';
             var time = '';
-            time += (100 + Math.floor(key / 3600)).toString().substr(1);
-            time += ':' + (100 + Math.floor((key % 3600) / 60)).toString().substr(1);
-            time += ':' + (100 + key % 60).toString().substr(1);
+            time += (100 + Math.floor(itemData.time / 3600)).toString().substr(1);
+            time += ':' + (100 + Math.floor((itemData.time % 3600) / 60)).toString().substr(1);
+            time += ':' + (100 + itemData.time % 60).toString().substr(1);
             html += '<input class="time" type="time" min="00:00" max="23:59" value="' + time + '" step="1" required>';
             var value = itemData.event;
             html += '<label>event:<input class="event" type="text" size="5" value="' + value + '"></label>';
@@ -75,7 +75,7 @@
 
         function onSave() {
             console.log('save');
-            var sendData = { 'everyday': {} };
+            var sendData = { 'everyday': [] };
             var items = $('.item');
             var n = items.length;
             for (var i = 0; i < n; i++) {
@@ -88,11 +88,11 @@
                 obj.event = $(items[i]).find('.event').val();
                 obj.command = $(items[i]).find('.command').val();
                 var timelist = time.split(':');
-                var key = parseInt(timelist[0]) * 3600 + parseInt(timelist[1]) * 60;
+                obj.time = parseInt(timelist[0]) * 3600 + parseInt(timelist[1]) * 60;
                 if (timelist[2]) {
-                    key += parseInt(timelist[2]);
+                    obj.time += parseInt(timelist[2]);
                 }
-                sendData.everyday[key] = obj;
+                sendData.everyday.push(obj);
             }
             ajax('./data', 'post', done, { 'data': sendData });
         }

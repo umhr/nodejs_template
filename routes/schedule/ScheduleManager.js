@@ -17,12 +17,12 @@ ScheduleManager.prototype._constructor = function () {
         this._setJson(json);
     } catch (e) {
         this._data = {
-            everyday:{}
+            everyday:[]
         };
         var sec = 15*60*60+26*60+15;
-        this._data.everyday[sec] = {enable:true, event:'shell', command:'adb -s 192.168.1.12:5555 reboot'};
+        this._data.everyday.push({enable:true, time:sec, event:'shell', command:'adb -s 192.168.1.12:5555 reboot'});
         sec = 12*60*60+30*60+0;
-        this._data.everyday[sec] = {enable:true, event:'shell', command:'adb -s 192.168.1.12:5555 shell input keyevent KEYCODE_HOME'};    
+        this._data.everyday.push({enable:true, time:sec, event:'shell', command:'adb -s 192.168.1.12:5555 shell input keyevent KEYCODE_HOME'});
     }
     this._start();
 }
@@ -45,15 +45,15 @@ ScheduleManager.prototype._run = function (date) {
     time -= date.getTimezoneOffset()*60;
     //var keys = Object.keys(this._data.everyday);
     var everydayTime = time%(24*60*60);
-    if(this._data.everyday[everydayTime]){
-        console.log('ScheduleManager._run');
-        var obj = this._data.everyday[everydayTime];
-        console.dir(obj);
-        if(obj.event){
-            this.dispatchEvent(obj.event, obj);
+    this._data.everyday.forEach((item)=>{
+        if(item.time == everydayTime){
+            if(item.event){
+                console.log('ScheduleManager._run');
+                console.dir(item);
+                this.dispatchEvent(item.event, item);
+            }
         }
-    }
-    //console.log(time, keys[0], everydayTime);
+    });
 }
 
 ScheduleManager.prototype._start = function () {
