@@ -21,6 +21,7 @@ var qrcode = require('./routes/qrcode/qrcode');
 var remote = require('./routes/remote/remote');
 var system = require('./routes/system/system');
 var serial = require('./routes/serial/serial');
+var schedule = require('./routes/schedule/schedule');
 var waitinglist = require('./routes/waitinglist/waitinglist');
 
 var app = express();
@@ -55,6 +56,7 @@ app.use('/waitinglist', waitinglist);
 app.use('/remote', remote);
 app.use('/system', system);
 app.use('/serial', serial);
+app.use('/schedule', schedule);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

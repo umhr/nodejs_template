@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>schedule</title>
+    <script src="../libs/jquery-3.5.1.min.js"></script>
+    <style type="text/css">
+        body {
+            background-color: #CCCCCC;
+            margin: 0;
+        }
+
+        pre {
+            white-space: pre-wrap;
+        }
+
+        .item {
+            background-color: #999999;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='content'>
+    </div>
+
+    <script type="text/javascript">
+        load();
+
+        function load() {
+            ajax('./data', 'get', done);
+        }
+
+        function done(data) {
+            var html = '';
+            html += '<h3>everyday</h3>';
+            var keys = Object.keys(data.data.everyday);
+            var n = keys.length;
+            for (var i = 0; i < n; i++) {
+                html += getItem(i, parseInt(keys[i]), data.data.everyday[keys[i]]);
+            }
+            html += '<div class="item">';
+            html += '<input class="enable" type="checkbox">';
+            html += '<input class="time" type="time" min="00:00" max="23:59" step="1" required>';
+            html += '<label>event:<input class="event" type="text" size="5"></label>';
+            html += '<label>command:<input class="command" type="text" size="60"></label>';
+            html += '</div>';
+
+            html += '<button onclick="onSave()" type="button">save</button>';
+            html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            $('#content').html(html);
+        }
+
+        function getItem(index, key, itemData) {
+            var html = '';
+            html += '<div class="item">';
+            var checked = itemData.enable ? ' checked="checked"' : '';
+            html += '<input class="enable" type="checkbox"' + checked + '>';
+            var time = '';
+            time += (100 + Math.floor(key / 3600)).toString().substr(1);
+            time += ':' + (100 + Math.floor((key % 3600) / 60)).toString().substr(1);
+            time += ':' + (100 + key % 60).toString().substr(1);
+            html += '<input class="time" type="time" min="00:00" max="23:59" value="' + time + '" step="1" required>';
+            var value = itemData.event;
+            html += '<label>event:<input class="event" type="text" size="5" value="' + value + '"></label>';
+            value = itemData.command;
+            html += '<label>command:<input class="command" type="text" size="60" value="' + value + '"></label>';
+            html += '</div>';
+            return html;
+        }
+
+        function onSave() {
+            console.log('save');
+            var sendData = { 'everyday': {} };
+            var items = $('.item');
+            var n = items.length;
+            for (var i = 0; i < n; i++) {
+                var time = $(items[i]).find('.time').val();
+                if (time == '') {
+                    continue;
+                }
+                var obj = {};
+                obj.enable = $(items[i]).find('.enable').get(0).checked;
+                obj.event = $(items[i]).find('.event').val();
+                obj.command = $(items[i]).find('.command').val();
+                var timelist = time.split(':');
+                var key = parseInt(timelist[0]) * 3600 + parseInt(timelist[1]) * 60;
+                if (timelist[2]) {
+                    key += parseInt(timelist[2]);
+                }
+                sendData.everyday[key] = obj;
+            }
+            ajax('./data', 'post', done, { 'data': sendData });
+        }
+
+        function ajax(url, type, func, payload) {
+            console.log(url);
+            var data;
+            if (payload != undefined) {
+                data = {};
+                data.payload = JSON.stringify(payload);
+            }
+            $.ajax({
+                url: url,
+                type: type,
+                dataType: 'json',
+                data: data,
+                timeout: 10000,
+            }).done((data) => {
+                console.dir(data);
+                if (func) {
+                    func(data);
+                }
+            }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log("error");
+            });
+        }
+    </script>
+</body>
+
+</html>

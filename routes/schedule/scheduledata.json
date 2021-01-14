@@ -1,0 +1,16 @@
+{
+    "data": {
+        "everyday": {
+            "45000": {
+                "enable": true,
+                "event": "shell",
+                "command": "adb -s 192.168.1.12:5555 shell input keyevent KEYCODE_HOME"
+            },
+            "56715": {
+                "enable": true,
+                "event": "shell",
+                "command": "adb -s 192.168.1.12:5555 reboot"
+            }
+        }
+    }
+}
