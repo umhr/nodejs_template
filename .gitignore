@@ -1,5 +1,5 @@
 # node_modules フォルダは同期しない。
-node_modules/
+*node_modules/
 
 # sqlite ファイルは要らない
 *.sqlite

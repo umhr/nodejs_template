@@ -1,3 +1,4 @@
+
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -20,7 +21,7 @@ var chat = require('./routes/chat/chat');
 var qrcode = require('./routes/qrcode/qrcode');
 var remote = require('./routes/remote/remote');
 var system = require('./routes/system/system');
-var serial = require('./routes/serial/serial');
+//var serial = require('./routes/serial/serial');
 var schedule = require('./routes/schedule/schedule');
 var waitinglist = require('./routes/waitinglist/waitinglist');
 
@@ -55,7 +56,7 @@ app.use('/qrcode', qrcode);
 app.use('/waitinglist', waitinglist);
 app.use('/remote', remote);
 app.use('/system', system);
-app.use('/serial', serial);
+//app.use('/serial', serial);
 app.use('/schedule', schedule);
 
 // catch 404 and forward to error handler
