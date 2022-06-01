@@ -22,7 +22,7 @@
     "pug-cli": "^1.0.0-alpha6",
     "qrcode": "^1.5.0",
     "serialport": "^9.2.8",
-    "sharp": "^0.29.3",
+    "sharp": "^0.30.5",
     "socket.io": "^4.4.1",
     "sqlite3": "^5.0.4"
   }
